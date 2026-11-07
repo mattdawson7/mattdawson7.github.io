@@ -27,6 +27,15 @@
   .card .phone { font-size: 1.6rem; font-family: Helvetica, Arial, sans-serif; font-weight: bold; }
   .card a { color: var(--water); text-decoration: none; }
   .card a:hover { text-decoration: underline; }
+
+  form { text-align: left; margin-top: 1rem; }
+  form label { display: block; font-family: Helvetica, Arial, sans-serif; font-size: .92rem; font-weight: bold; margin: .8rem 0 .25rem; color: var(--deep); }
+  form input, form select, form textarea { width: 100%; padding: .6rem .7rem; border: 1px solid #b9c6cd; border-radius: 6px; font-size: 1rem; font-family: Helvetica, Arial, sans-serif; background: #fff; }
+  form textarea { min-height: 90px; resize: vertical; }
+  form button { display: block; width: 100%; margin-top: 1.2rem; background: var(--leaf); color: #fff; border: none; cursor: pointer;
+                padding: .85rem 1.6rem; border-radius: 999px; font-size: 1.1rem; font-family: Helvetica, Arial, sans-serif; font-weight: bold; }
+  form button:hover { background: #34682f; }
+  .formnote { font-size: .9rem; color: #5a6a74; text-align: center; margin-top: .8rem; }
   footer { text-align: center; color: #5a6a74; font-size: .9rem; padding: 0 1rem 2.5rem; }
 </style>
 </head>
@@ -57,10 +66,34 @@
     <h2>Prices</h2>
     <p>Fair, reasonable prices — and <strong>free estimates</strong>. Every dock and shoreline is unique and special, so call or text a photo of your dock and we'll quote the job.</p>
   </section>
-  <section class="card">
+  <section class="card" id="estimate">
     <h2 style="border:none;">Get a free estimate</h2>
     <p class="phone"><a href="tel:+15133908580">513-390-8580</a></p>
-    <p>Call or text — a photo of your dock helps us quote fast.<br>Local, right here on Spy Pond in Arlington, MA.</p>
+    <p>Call or text — or send the form and we'll get back to you.<br>Local, right here on Spy Pond in Arlington, MA.</p>
+    <form action="https://formsubmit.co/junk4mattt@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="New dock removal request — from the website">
+      <input type="hidden" name="_template" value="table">
+      <input type="text" name="_honey" style="display:none">
+      <label for="f-name">Your name</label>
+      <input id="f-name" type="text" name="Name" required>
+      <label for="f-phone">Phone</label>
+      <input id="f-phone" type="tel" name="Phone" required>
+      <label for="f-email">Email</label>
+      <input id="f-email" type="email" name="Email">
+      <label for="f-service">What do you need?</label>
+      <select id="f-service" name="Service">
+        <option>Permanent dock removal</option>
+        <option>Not sure — please take a look</option>
+      </select>
+      <label for="f-where">Where is the dock, and roughly how big is it?</label>
+      <input id="f-where" type="text" name="Dock location and size" placeholder="e.g. Spy Pond, south shore — about 24 ft, wood">
+      <label for="f-when">When would you like it done?</label>
+      <input id="f-when" type="text" name="Preferred timing" placeholder="e.g. Before the pond freezes, or this spring">
+      <label for="f-msg">Anything else we should know?</label>
+      <textarea id="f-msg" name="Message"></textarea>
+      <button type="submit">Send my request</button>
+      <p class="formnote">Your information goes only to Spy Pond Dock Removal — never shared, never sold.</p>
+    </form>
   </section>
 </main>
 <footer>Spy Pond Dock Removal · Arlington, Massachusetts</footer>
