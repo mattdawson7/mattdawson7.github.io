@@ -5,27 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" href="data:," />
-<title>Arlington Election Results Map — Desktop</title>
+<title>Arlington Dashboard</title>
 <style>
   :root{
     --bg:#eef0f3; --card:#ffffff; --card2:#f7f8fa; --ink:#17222e; --ink2:#43536a; --ink3:#6b7a8d;
     --line:#d7dde5; --line2:#c3ccd7;
-    --navy:#1d3a5f;
+    --navy:#1d3a5f; --accent:#2563a8; --accent2:#1e8449; --accent3:#b06a2c;
     --btn-bg:#ffffff; --btn-line:#c9d2dd; --btn-ink:#22344c;
     --shadow:0 1px 3px rgba(23,34,46,.08),0 6px 18px rgba(23,34,46,.05);
     --radius:10px;
-    --map-bg:#e9eee6; --street:#ffffff; --street-casing:#ccd3c9; --water:#b8d4e8;
+    --map-bg:#e9eee6; --street:#ffffff; --street-casing:#ccd3c9; --street-local:#d3dbd0; --water:#b8d4e8;
     --road-label:#5a6a7d; --precinct-stroke:#ffffff;
+    --track:#e6eaef;
   }
   @media (prefers-color-scheme: dark){
     :root{
       --bg:#12161c; --card:#1c232e; --card2:#232c39; --ink:#e8edf3; --ink2:#b6c2d1; --ink3:#8b9aaf;
       --line:#333f4f; --line2:#43536a;
-      --navy:#8fb4dd;
+      --navy:#8fb4dd; --accent:#5b93cc; --accent2:#4cb377; --accent3:#d19a55;
       --btn-bg:#232c39; --btn-line:#43536a; --btn-ink:#dbe5f0;
       --shadow:0 1px 3px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
-      --map-bg:#1e2a24; --street:#33413a; --street-casing:#232c39; --water:#274b66;
+      --map-bg:#1e2a24; --street:#33413a; --street-casing:#232c39; --street-local:#2a362f; --water:#274b66;
       --road-label:#9db1a5; --precinct-stroke:#12161c;
+      --track:#2b3543;
     }
   }
   *{box-sizing:border-box}
@@ -37,25 +39,48 @@
     -webkit-font-smoothing:antialiased;
   }
   button{font-family:inherit; cursor:pointer}
+  a{color:var(--accent)}
 
-  /* ---------- compact header: one small line ---------- */
+  /* ---------- header ---------- */
   header.top{
     background:var(--card); border-bottom:2px solid var(--navy);
-    padding:5px 20px 4px; flex:none;
+    padding:8px 20px 7px; flex:none;
   }
-  .top-inner{max-width:1720px;margin:0 auto; display:flex; flex-wrap:wrap; align-items:baseline; gap:0 10px}
-  h1{font-size:15.5px; font-weight:800; margin:0; letter-spacing:-.01em; line-height:1.15; white-space:nowrap}
-  .top-stats{color:var(--ink2); font-size:12px; margin:0; font-weight:500; white-space:nowrap}
+  .top-inner{max-width:1720px;margin:0 auto; display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 12px}
+  h1{font-size:19px; font-weight:800; margin:0; letter-spacing:-.01em; line-height:1.15}
+  .top-stats{color:var(--ink2); font-size:12.5px; margin:0; font-weight:500}
 
-  /* ---------- desktop layout: one screen, no page scroll ---------- */
+  /* ---------- view + layout controls ---------- */
+  .controls{
+    max-width:1720px; margin:0 auto; padding:8px 16px 0; width:100%;
+    display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; flex:none;
+  }
+  .ctl-group{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  .ctl-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink3)}
+  .seg{display:inline-flex; border:1.5px solid var(--btn-line); border-radius:999px; overflow:hidden; background:var(--btn-bg)}
+  .seg button{
+    border:0; background:transparent; color:var(--btn-ink); padding:6px 14px;
+    font-size:13.5px; font-weight:600; line-height:1.2;
+  }
+  .seg button + button{border-left:1.5px solid var(--btn-line)}
+  .seg button.selected{background:var(--navy); color:#fff}
+  @media (prefers-color-scheme: dark){ .seg button.selected{background:#2c5282; color:#fff} }
+
+  /* ---------- desktop election layout: one screen, no page scroll ---------- */
   .layout{
     max-width:1720px; margin:0 auto; padding:8px 16px 6px; width:100%;
     display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:14px; align-items:stretch;
   }
   @media (min-width:901px){
-    body{display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden}
-    .layout{flex:1 1 auto; min-height:0}
+    body.mode-desktop.view-election{display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden}
+    body.mode-desktop.view-election .layout{flex:1 1 auto; min-height:0}
   }
+  /* compact layout: single column, page scrolls (both views) */
+  body.mode-compact .layout{grid-template-columns:minmax(0,1fr)}
+  body.mode-compact #map{flex:none; display:block}
+  body.mode-compact #map svg{height:auto}
+  body.mode-compact .map-wrap{flex:none}
+  body.mode-compact .panel{overflow:visible}
 
   /* ---------- self-contained SVG map ---------- */
   .map-col{min-width:0; display:flex; flex-direction:column; min-height:0}
@@ -67,6 +92,7 @@
   #map svg{display:block; width:100%; height:100%}
   .street-line{fill:none; stroke:var(--street); stroke-linecap:round; stroke-linejoin:round}
   .street-casing{fill:none; stroke:var(--street-casing); stroke-linecap:round; stroke-linejoin:round}
+  .street-local{fill:none; stroke:var(--street-local); stroke-linecap:round; stroke-linejoin:round}
   .water-body{fill:var(--water); stroke:none}
   .precinct-path{stroke:var(--precinct-stroke); stroke-width:1.6; stroke-linejoin:round; cursor:pointer; fill-opacity:.62}
   .precinct-path:hover, .precinct-path:focus{stroke:#17222e; stroke-width:2.6; outline:none}
@@ -116,13 +142,13 @@
   .legend-scale .end{text-align:right}
   .legend-note{font-size:12px; color:var(--ink3); margin-top:4px}
 
-  /* ---------- button panel ---------- */
+  /* ---------- election button panel ---------- */
   .panel{
     background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
     box-shadow:var(--shadow); padding:12px 14px 10px; min-height:0;
   }
   @media (min-width:901px){
-    .panel{overflow-y:auto}
+    body.mode-desktop.view-election .panel{overflow-y:auto}
   }
   .panel h2{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink2); margin:0 0 8px; font-weight:700}
   .race-label{font-size:12.5px; font-weight:700; color:var(--ink2); margin:12px 0 5px}
@@ -148,58 +174,336 @@
   .q-grid .q-grad{width:24px; height:12px; border-radius:3px; flex:none; border:1px solid rgba(0,0,0,.22)}
   .opt-btn.selected .q-grad{border-color:rgba(255,255,255,.5)}
 
+  /* ---------- demographics ---------- */
+  .demo{max-width:1720px; margin:0 auto; padding:10px 16px 4px; width:100%}
+  .demo-intro{color:var(--ink2); font-size:13.5px; margin:2px 0 10px; max-width:75ch}
+  .kpi-row{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:14px}
+  .kpi{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:10px 13px 9px;
+  }
+  .kpi .k-val{font-size:21px; font-weight:800; letter-spacing:-.01em; line-height:1.15}
+  .kpi .k-lab{font-size:12px; color:var(--ink2); font-weight:600; margin-top:1px}
+  .kpi .k-sub{font-size:11.5px; color:var(--ink3)}
+  .demo-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:14px; align-items:start}
+  .dcard{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:13px 16px 12px;
+  }
+  .dcard.wide{grid-column:1 / -1}
+  .dcard h2{font-size:15.5px; font-weight:800; margin:0 0 2px; letter-spacing:-.01em}
+  .dcard .d-sub{font-size:12.5px; color:var(--ink2); margin:0 0 9px}
+  .bar-row{display:grid; grid-template-columns:118px minmax(0,1fr) 76px; gap:8px; align-items:center; padding:2.5px 0; font-size:13px}
+  .bar-row .b-lab{color:var(--ink); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .bar-track{background:var(--track); height:13px; border-radius:4px; overflow:hidden}
+  .bar-fill{height:100%; border-radius:4px; background:var(--accent)}
+  .bar-fill.g{background:var(--accent2)} .bar-fill.o{background:var(--accent3)} .bar-fill.n{background:var(--navy)}
+  @media (prefers-color-scheme: dark){ .bar-fill.n{background:var(--accent)} }
+  .bar-row .b-val{text-align:right; color:var(--ink2); font-weight:600; white-space:nowrap}
+  .fact-list{margin:9px 0 0; padding:0; list-style:none; font-size:13.5px}
+  .fact-list li{padding:4px 0; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:12px}
+  .fact-list li:first-child{border-top:0}
+  .fact-list .f-lab{color:var(--ink2)}
+  .fact-list .f-val{font-weight:700; text-align:right; white-space:nowrap}
+  .tenure{display:flex; align-items:center; gap:16px; margin:4px 0 2px}
+  .tenure-legend{font-size:13.5px}
+  .tenure-legend div{padding:2px 0}
+  .swatch{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px}
+  table.cmp{border-collapse:collapse; width:100%; font-size:13.5px}
+  table.cmp th, table.cmp td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:right}
+  table.cmp th:first-child, table.cmp td:first-child{text-align:left}
+  table.cmp thead th{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink2); border-bottom:2px solid var(--line2)}
+  table.cmp td:first-child{color:var(--ink2); font-weight:600}
+  table.cmp td.hl{font-weight:800; color:var(--ink)}
+  .pct-table-wrap{overflow-x:auto}
+  table.pcts{border-collapse:collapse; width:100%; font-size:13px; min-width:520px}
+  table.pcts th, table.pcts td{padding:4.5px 8px; border-bottom:1px solid var(--line); text-align:right}
+  table.pcts th:first-child, table.pcts td:first-child{text-align:left}
+  table.pcts thead th{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink2)}
+
   footer{
-    max-width:1720px; margin:0 auto; padding:4px 20px 8px; width:100%;
-    color:var(--ink3); font-size:12px; flex:none;
+    max-width:1720px; margin:0 auto; padding:8px 20px 12px; width:100%;
+    color:var(--ink3); font-size:12px; flex:none; line-height:1.55;
   }
 
-  /* ---------- narrower screens: stack and scroll normally ---------- */
+  [hidden]{display:none !important}
+
+  /* ---------- narrower screens: stack ---------- */
   @media (max-width:900px){
     .layout{grid-template-columns:minmax(0,1fr); padding:8px 12px 4px}
     #map{flex:none; display:block}
     #map svg{height:auto}
     .map-wrap{flex:none}
-    h1{white-space:normal}
-    .top-stats{white-space:normal}
+    .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .demo{padding:10px 12px 4px}
+    .controls{padding:8px 12px 0}
     footer{padding-bottom:14px}
+  }
+  @media (min-width:901px) and (max-width:1250px){
+    .kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}
   }
 </style>
 </head>
-<body>
+<body class="mode-desktop view-election">
 
 <header class="top">
   <div class="top-inner">
-    <h1>Arlington Election Results · Nov 3, 2026</h1>
-    <p class="top-stats">23,946 ballots cast · 71.9% turnout</p>
+    <h1>Arlington Dashboard</h1>
+    <p class="top-stats">Arlington, Massachusetts · Population 46,350 · 21 precincts · Middlesex County</p>
   </div>
 </header>
 
-<div class="layout">
-  <div class="map-col">
-    <section class="map-wrap">
-      <div id="map" role="application" aria-label="Map of Arlington precincts, colored by election results"></div>
-      <p class="map-hint">Tap a precinct to see its numbers.</p>
-      <div class="precinct-info" id="precinctInfo" aria-live="polite"></div>
-    </section>
-    <section class="legend" aria-live="polite">
-      <p class="legend-what" id="legendWhat"></p>
-      <div class="legend-gradient" id="legendGradient"></div>
-      <div class="legend-scale">
-        <span id="legendLeft"></span>
-        <span class="mid" id="legendMid"></span>
-        <span class="end" id="legendRight"></span>
-      </div>
-      <div class="legend-note" id="legendNote"></div>
-    </section>
+<div class="controls">
+  <div class="ctl-group">
+    <span class="ctl-label" id="viewLabel">View</span>
+    <div class="seg" role="group" aria-labelledby="viewLabel">
+      <button type="button" id="tabElection" class="selected">Election map</button>
+      <button type="button" id="tabDemo">Demographics</button>
+    </div>
   </div>
-
-  <aside class="panel" aria-label="Pick a candidate or a ballot question">
-    <h2>Pick a name or a question</h2>
-    <div id="buttons"></div>
-  </aside>
+  <div class="ctl-group">
+    <span class="ctl-label" id="layoutLabel">Layout</span>
+    <div class="seg" role="group" aria-labelledby="layoutLabel">
+      <button type="button" id="layDesktop" class="selected">Desktop</button>
+      <button type="button" id="layCompact">Compact</button>
+    </div>
+  </div>
 </div>
 
-<footer>Unofficial results from the Town of Arlington.</footer>
+<div id="electionView">
+  <div class="layout">
+    <div class="map-col">
+      <section class="map-wrap">
+        <div id="map" role="application" aria-label="Map of Arlington precincts, colored by election results"></div>
+        <p class="map-hint">State election · Nov 3, 2026 · 23,946 ballots cast · 71.9% turnout. Tap a precinct to see its numbers. Streets are real Census road centerlines; only precinct numbers appear on the map face.</p>
+        <div class="precinct-info" id="precinctInfo" aria-live="polite"></div>
+      </section>
+      <section class="legend" aria-live="polite">
+        <p class="legend-what" id="legendWhat"></p>
+        <div class="legend-gradient" id="legendGradient"></div>
+        <div class="legend-scale">
+          <span id="legendLeft"></span>
+          <span class="mid" id="legendMid"></span>
+          <span class="end" id="legendRight"></span>
+        </div>
+        <div class="legend-note" id="legendNote"></div>
+      </section>
+    </div>
+
+    <aside class="panel" aria-label="Pick a candidate or a ballot question">
+      <h2>Pick a name or a question</h2>
+      <div id="buttons"></div>
+    </aside>
+  </div>
+</div>
+
+<main class="demo" id="demoView" hidden>
+  <p class="demo-intro">Who lives in Arlington — from the U.S. Census Bureau&rsquo;s American Community Survey, 2020&ndash;2024 five-year estimates, unless a figure is marked as the 2020 Census count. Middlesex County and Massachusetts figures are shown for comparison at the bottom.</p>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="k-val">46,350</div><div class="k-lab">Population</div><div class="k-sub">46,308 in the 2020 Census · est. 46,563 in 2025</div></div>
+    <div class="kpi"><div class="k-val">41.6 yrs</div><div class="k-lab">Median age</div><div class="k-sub">Men 40.4 · Women 42.9</div></div>
+    <div class="kpi"><div class="k-val">$150,701</div><div class="k-lab">Median household income</div><div class="k-sub">Per capita income $91,718</div></div>
+    <div class="kpi"><div class="k-val">$933,800</div><div class="k-lab">Median home value</div><div class="k-sub">Median gross rent $2,082/mo</div></div>
+    <div class="kpi"><div class="k-val">76.1%</div><div class="k-lab">Bachelor&rsquo;s degree or higher</div><div class="k-sub">Of residents age 25+</div></div>
+    <div class="kpi"><div class="k-val">20,005</div><div class="k-lab">Households</div><div class="k-sub">2.30 persons per household</div></div>
+  </div>
+
+  <div class="demo-grid">
+    <section class="dcard">
+      <h2>Age</h2>
+      <p class="d-sub">Share of the 46,350 residents in each age band.</p>
+      <div class="bar-row"><span class="b-lab">Under 5</span><div class="bar-track"><div class="bar-fill" style="width:9.5%"></div></div><span class="b-val">2,201 · 4.7%</span></div>
+      <div class="bar-row"><span class="b-lab">5 to 17</span><div class="bar-track"><div class="bar-fill" style="width:31.6%"></div></div><span class="b-val">7,315 · 15.8%</span></div>
+      <div class="bar-row"><span class="b-lab">18 to 34</span><div class="bar-track"><div class="bar-fill" style="width:39%"></div></div><span class="b-val">9,033 · 19.5%</span></div>
+      <div class="bar-row"><span class="b-lab">35 to 49</span><div class="bar-track"><div class="bar-fill" style="width:44.6%"></div></div><span class="b-val">10,351 · 22.3%</span></div>
+      <div class="bar-row"><span class="b-lab">50 to 64</span><div class="bar-track"><div class="bar-fill" style="width:40.6%"></div></div><span class="b-val">9,420 · 20.3%</span></div>
+      <div class="bar-row"><span class="b-lab">65 to 74</span><div class="bar-track"><div class="bar-fill" style="width:19.8%"></div></div><span class="b-val">4,585 · 9.9%</span></div>
+      <div class="bar-row"><span class="b-lab">75 and over</span><div class="bar-track"><div class="bar-fill" style="width:14.8%"></div></div><span class="b-val">3,445 · 7.4%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Under 18</span><span class="f-val">9,516 · 20.5%</span></li>
+        <li><span class="f-lab">Age 65 and over</span><span class="f-val">8,030 · 17.3%</span></li>
+        <li><span class="f-lab">Women</span><span class="f-val">52.6% of residents</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Race &amp; ethnicity</h2>
+      <p class="d-sub">Race alone, as reported in the ACS. Hispanic or Latino residents (4.9%) are counted within the race groups.</p>
+      <div class="bar-row"><span class="b-lab">White</span><div class="bar-track"><div class="bar-fill n" style="width:74.3%"></div></div><span class="b-val">34,441 · 74.3%</span></div>
+      <div class="bar-row"><span class="b-lab">Asian</span><div class="bar-track"><div class="bar-fill n" style="width:13%"></div></div><span class="b-val">6,024 · 13.0%</span></div>
+      <div class="bar-row"><span class="b-lab">Two or more</span><div class="bar-track"><div class="bar-fill n" style="width:8.7%"></div></div><span class="b-val">4,010 · 8.7%</span></div>
+      <div class="bar-row"><span class="b-lab">Black</span><div class="bar-track"><div class="bar-fill n" style="width:2%"></div></div><span class="b-val">931 · 2.0%</span></div>
+      <div class="bar-row"><span class="b-lab">Some other race</span><div class="bar-track"><div class="bar-fill n" style="width:1.9%"></div></div><span class="b-val">894 · 1.9%</span></div>
+      <div class="bar-row"><span class="b-lab">Native / Pacific Is.</span><div class="bar-track"><div class="bar-fill n" style="width:.5%"></div></div><span class="b-val">50 · 0.1%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Hispanic or Latino (any race)</span><span class="f-val">2,266 · 4.9%</span></li>
+        <li><span class="f-lab">Foreign-born</span><span class="f-val">8,609 · 18.6%</span></li>
+        <li><span class="f-lab">Foreign-born, naturalized citizens</span><span class="f-val">4,373</span></li>
+        <li><span class="f-lab">Foreign-born, not yet citizens</span><span class="f-val">4,236</span></li>
+        <li><span class="f-lab">Born in the United States</span><span class="f-val">37,741 · 81.4%</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Household income</h2>
+      <p class="d-sub">Distribution of Arlington&rsquo;s 20,005 households by annual income.</p>
+      <div class="bar-row"><span class="b-lab">Under $25k</span><div class="bar-track"><div class="bar-fill g" style="width:22.7%"></div></div><span class="b-val">1,714 · 8.6%</span></div>
+      <div class="bar-row"><span class="b-lab">$25k&ndash;$50k</span><div class="bar-track"><div class="bar-fill g" style="width:18.7%"></div></div><span class="b-val">1,421 · 7.1%</span></div>
+      <div class="bar-row"><span class="b-lab">$50k&ndash;$75k</span><div class="bar-track"><div class="bar-fill g" style="width:17.7%"></div></div><span class="b-val">1,332 · 6.7%</span></div>
+      <div class="bar-row"><span class="b-lab">$75k&ndash;$100k</span><div class="bar-track"><div class="bar-fill g" style="width:23.3%"></div></div><span class="b-val">1,769 · 8.8%</span></div>
+      <div class="bar-row"><span class="b-lab">$100k&ndash;$150k</span><div class="bar-track"><div class="bar-fill g" style="width:48.8%"></div></div><span class="b-val">3,695 · 18.5%</span></div>
+      <div class="bar-row"><span class="b-lab">$150k&ndash;$200k</span><div class="bar-track"><div class="bar-fill g" style="width:33%"></div></div><span class="b-val">2,502 · 12.5%</span></div>
+      <div class="bar-row"><span class="b-lab">$200k or more</span><div class="bar-track"><div class="bar-fill g" style="width:100%"></div></div><span class="b-val">7,572 · 37.9%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Households earning $100k+</span><span class="f-val">13,769 · 68.8%</span></li>
+        <li><span class="f-lab">Residents below the poverty line</span><span class="f-val">2,477 · 5.4%</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Education</h2>
+      <p class="d-sub">Highest level completed, residents age 25 and over (34,941 people).</p>
+      <div class="bar-row"><span class="b-lab">Graduate / prof.</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="b-val">16,248 · 46.5%</span></div>
+      <div class="bar-row"><span class="b-lab">Bachelor&rsquo;s</span><div class="bar-track"><div class="bar-fill" style="width:63.7%"></div></div><span class="b-val">10,336 · 29.6%</span></div>
+      <div class="bar-row"><span class="b-lab">Associate degree</span><div class="bar-track"><div class="bar-fill" style="width:20.9%"></div></div><span class="b-val">3,395 · 9.7%</span></div>
+      <div class="bar-row"><span class="b-lab">High school</span><div class="bar-track"><div class="bar-fill" style="width:18.5%"></div></div><span class="b-val">3,000 · 8.6%</span></div>
+      <div class="bar-row"><span class="b-lab">Some college</span><div class="bar-track"><div class="bar-fill" style="width:7.7%"></div></div><span class="b-val">1,247 · 3.6%</span></div>
+      <div class="bar-row"><span class="b-lab">No diploma</span><div class="bar-track"><div class="bar-fill" style="width:4.3%"></div></div><span class="b-val">715 · 2.0%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Master&rsquo;s degrees</span><span class="f-val">9,765</span></li>
+        <li><span class="f-lab">Doctorates</span><span class="f-val">4,046</span></li>
+        <li><span class="f-lab">Professional degrees</span><span class="f-val">2,437</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Work &amp; commuting</h2>
+      <p class="d-sub">How Arlington&rsquo;s 26,959 workers get to work — and how long it takes.</p>
+      <div class="bar-row"><span class="b-lab">Drove alone</span><div class="bar-track"><div class="bar-fill o" style="width:100%"></div></div><span class="b-val">11,740 · 43.5%</span></div>
+      <div class="bar-row"><span class="b-lab">Worked from home</span><div class="bar-track"><div class="bar-fill o" style="width:79.2%"></div></div><span class="b-val">9,295 · 34.5%</span></div>
+      <div class="bar-row"><span class="b-lab">Public transit</span><div class="bar-track"><div class="bar-fill o" style="width:25.5%"></div></div><span class="b-val">2,988 · 11.1%</span></div>
+      <div class="bar-row"><span class="b-lab">Walked</span><div class="bar-track"><div class="bar-fill o" style="width:10.7%"></div></div><span class="b-val">1,257 · 4.7%</span></div>
+      <div class="bar-row"><span class="b-lab">Carpooled</span><div class="bar-track"><div class="bar-fill o" style="width:6.9%"></div></div><span class="b-val">806 · 3.0%</span></div>
+      <div class="bar-row"><span class="b-lab">Bike / other</span><div class="bar-track"><div class="bar-fill o" style="width:6.9%"></div></div><span class="b-val">808 · 3.0%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Transit riders — subway / rail</span><span class="f-val">1,901</span></li>
+        <li><span class="f-lab">Transit riders — bus</span><span class="f-val">1,087</span></li>
+        <li><span class="f-lab">In the labor force (age 16+)</span><span class="f-val">28,126 · 74.2%</span></li>
+        <li><span class="f-lab">Unemployment rate</span><span class="f-val">2.9%</span></li>
+        <li><span class="f-lab">Commute under 15 minutes</span><span class="f-val">13.9% of commuters</span></li>
+        <li><span class="f-lab">Commute 45 minutes or more</span><span class="f-val">27.3% of commuters</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Households &amp; families</h2>
+      <p class="d-sub">Living arrangements across Arlington&rsquo;s 20,005 households.</p>
+      <div class="bar-row"><span class="b-lab">Family households</span><div class="bar-track"><div class="bar-fill n" style="width:100%"></div></div><span class="b-val">12,105 · 60.5%</span></div>
+      <div class="bar-row"><span class="b-lab">Married-couple</span><div class="bar-track"><div class="bar-fill n" style="width:84%"></div></div><span class="b-val">10,171 · 50.8%</span></div>
+      <div class="bar-row"><span class="b-lab">Nonfamily</span><div class="bar-track"><div class="bar-fill n" style="width:65.3%"></div></div><span class="b-val">7,900 · 39.5%</span></div>
+      <div class="bar-row"><span class="b-lab">Living alone</span><div class="bar-track"><div class="bar-fill n" style="width:52.3%"></div></div><span class="b-val">6,324 · 31.6%</span></div>
+      <div class="bar-row"><span class="b-lab">Other family</span><div class="bar-track"><div class="bar-fill n" style="width:16%"></div></div><span class="b-val">1,934 · 9.7%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Persons per household</span><span class="f-val">2.30</span></li>
+        <li><span class="f-lab">Other family (no spouse present)</span><span class="f-val">1,934 households</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Housing — own or rent</h2>
+      <p class="d-sub">20,746 housing units; 20,005 occupied, 741 vacant (3.6%).</p>
+      <div class="tenure">
+        <svg width="104" height="104" viewBox="0 0 104 104" role="img" aria-label="Owner-occupied 61.6 percent, renter-occupied 38.4 percent">
+          <circle cx="52" cy="52" r="42" fill="none" stroke="var(--accent3)" stroke-width="17"></circle>
+          <circle cx="52" cy="52" r="42" fill="none" stroke="var(--accent)" stroke-width="17"
+            stroke-dasharray="162.6 263.9" transform="rotate(-90 52 52)"></circle>
+        </svg>
+        <div class="tenure-legend">
+          <div><span class="swatch" style="background:var(--accent)"></span>Owner-occupied — 12,325 · 61.6%</div>
+          <div><span class="swatch" style="background:var(--accent3)"></span>Renter-occupied — 7,680 · 38.4%</div>
+        </div>
+      </div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Median home value</span><span class="f-val">$933,800</span></li>
+        <li><span class="f-lab">Median gross rent</span><span class="f-val">$2,082 / month</span></li>
+        <li><span class="f-lab">Median year built</span><span class="f-val">1945</span></li>
+        <li><span class="f-lab">Vacancy rate</span><span class="f-val">3.6%</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Housing — what&rsquo;s built</h2>
+      <p class="d-sub">Units in structure, and when Arlington&rsquo;s housing was built.</p>
+      <div class="bar-row"><span class="b-lab">Single-family, detached</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="b-val">7,856 · 37.9%</span></div>
+      <div class="bar-row"><span class="b-lab">Two-family</span><div class="bar-track"><div class="bar-fill" style="width:63.1%"></div></div><span class="b-val">4,957 · 23.9%</span></div>
+      <div class="bar-row"><span class="b-lab">20+ units</span><div class="bar-track"><div class="bar-fill" style="width:35.6%"></div></div><span class="b-val">2,796 · 13.5%</span></div>
+      <div class="bar-row"><span class="b-lab">5 to 19 units</span><div class="bar-track"><div class="bar-fill" style="width:30.1%"></div></div><span class="b-val">2,374 · 11.4%</span></div>
+      <div class="bar-row"><span class="b-lab">Single-family, attached</span><div class="bar-track"><div class="bar-fill" style="width:19.5%"></div></div><span class="b-val">1,532 · 7.4%</span></div>
+      <div class="bar-row"><span class="b-lab">3 to 4 units</span><div class="bar-track"><div class="bar-fill" style="width:14.5%"></div></div><span class="b-val">1,151 · 5.5%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Built 1939 or earlier</span><span class="f-val">9,774 · 47.1%</span></li>
+        <li><span class="f-lab">Built 1940&ndash;1959</span><span class="f-val">3,813 · 18.4%</span></li>
+        <li><span class="f-lab">Built 1960&ndash;1979</span><span class="f-val">4,216 · 20.3%</span></li>
+        <li><span class="f-lab">Built 1980&ndash;1999</span><span class="f-val">1,270 · 6.1%</span></li>
+        <li><span class="f-lab">Built 2000 or later</span><span class="f-val">1,673 · 8.1%</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard">
+      <h2>Commute time</h2>
+      <p class="d-sub">Travel time for the 17,664 workers who don&rsquo;t work from home.</p>
+      <div class="bar-row"><span class="b-lab">Under 15 min</span><div class="bar-track"><div class="bar-fill o" style="width:46%"></div></div><span class="b-val">2,450 · 13.9%</span></div>
+      <div class="bar-row"><span class="b-lab">15 to 29 min</span><div class="bar-track"><div class="bar-fill o" style="width:100%"></div></div><span class="b-val">5,332 · 30.2%</span></div>
+      <div class="bar-row"><span class="b-lab">30 to 44 min</span><div class="bar-track"><div class="bar-fill o" style="width:95%"></div></div><span class="b-val">5,066 · 28.7%</span></div>
+      <div class="bar-row"><span class="b-lab">45 to 59 min</span><div class="bar-track"><div class="bar-fill o" style="width:53.9%"></div></div><span class="b-val">2,874 · 16.3%</span></div>
+      <div class="bar-row"><span class="b-lab">60 min or more</span><div class="bar-track"><div class="bar-fill o" style="width:36.4%"></div></div><span class="b-val">1,942 · 11.0%</span></div>
+      <ul class="fact-list">
+        <li><span class="f-lab">Workers 16 and over</span><span class="f-val">26,959</span></li>
+        <li><span class="f-lab">Work from home share</span><span class="f-val">34.5%</span></li>
+      </ul>
+    </section>
+
+    <section class="dcard wide">
+      <h2>Arlington compared</h2>
+      <p class="d-sub">Same ACS 2020&ndash;2024 five-year estimates, three geographies.</p>
+      <div class="pct-table-wrap">
+      <table class="cmp">
+        <thead><tr><th>Measure</th><th>Arlington</th><th>Middlesex County</th><th>Massachusetts</th></tr></thead>
+        <tbody>
+          <tr><td>Median age</td><td class="hl">41.6</td><td>38.9</td><td>40.0</td></tr>
+          <tr><td>Median household income</td><td class="hl">$150,701</td><td>$130,847</td><td>$103,960</td></tr>
+          <tr><td>Per capita income</td><td class="hl">$91,718</td><td>$69,556</td><td>$57,897</td></tr>
+          <tr><td>Median home value</td><td class="hl">$933,800</td><td>$727,800</td><td>$562,100</td></tr>
+          <tr><td>Median gross rent</td><td class="hl">$2,082</td><td>$2,201</td><td>$1,762</td></tr>
+          <tr><td>Bachelor&rsquo;s degree or higher</td><td class="hl">76.1%</td><td>59.5%</td><td>47.3%</td></tr>
+          <tr><td>Below the poverty line</td><td class="hl">5.4%</td><td>7.7%</td><td>10.0%</td></tr>
+          <tr><td>Foreign-born</td><td class="hl">18.6%</td><td>23.1%</td><td>18.0%</td></tr>
+          <tr><td>White alone</td><td class="hl">74.3%</td><td>66.8%</td><td>68.6%</td></tr>
+          <tr><td>Hispanic or Latino</td><td class="hl">4.9%</td><td>9.3%</td><td>13.3%</td></tr>
+          <tr><td>Owner-occupied homes</td><td class="hl">61.6%</td><td>61.3%</td><td>62.5%</td></tr>
+          <tr><td>Median year home built</td><td class="hl">1945</td><td>1962</td><td>1964</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section class="dcard wide">
+      <h2>Precincts at a glance</h2>
+      <p class="d-sub">2020 Census population and ballots cast in the Nov 3, 2026 state election, by precinct.</p>
+      <div class="pct-table-wrap">
+        <table class="pcts">
+          <thead><tr><th>Precinct</th><th>Population (2020)</th><th>Ballots cast (2026)</th><th>Share of town ballots</th></tr></thead>
+          <tbody id="precinctTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  Election results: unofficial, Town of Arlington, state election of Nov 3, 2026. Demographics: U.S. Census Bureau, American Community Survey 2020&ndash;2024 five-year estimates (via Census Reporter) and the 2020 Census; see also <a href="https://www.census.gov/quickfacts/fact/table/arlingtontownmiddlesexcountymassachusetts/POP815223">Census QuickFacts for Arlington town</a>. Roads: U.S. Census Bureau TIGER road centerlines, clipped to the town boundary. Water: MassGIS hydrography. Precinct boundaries: MassGIS Wards &amp; Precincts, 2022.
+</footer>
 
 <script>
 var RESULTS = {
@@ -2281,6 +2585,31 @@ var GEO = {"type": "FeatureCollection", "features": [{"type": "Feature", "id": 5
 (function(){
 "use strict";
 
+/* ---------- view + layout switching ---------- */
+var tabElection = document.getElementById("tabElection");
+var tabDemo = document.getElementById("tabDemo");
+var layDesktop = document.getElementById("layDesktop");
+var layCompact = document.getElementById("layCompact");
+function setView(demo){
+  document.body.classList.toggle("view-demo", demo);
+  document.body.classList.toggle("view-election", !demo);
+  document.getElementById("electionView").hidden = demo;
+  document.getElementById("demoView").hidden = !demo;
+  tabElection.classList.toggle("selected", !demo);
+  tabDemo.classList.toggle("selected", demo);
+  window.scrollTo(0, 0);
+}
+function setLayout(compact){
+  document.body.classList.toggle("mode-compact", compact);
+  document.body.classList.toggle("mode-desktop", !compact);
+  layDesktop.classList.toggle("selected", !compact);
+  layCompact.classList.toggle("selected", compact);
+}
+tabElection.addEventListener("click", function(){ setView(false); });
+tabDemo.addEventListener("click", function(){ setView(true); });
+layDesktop.addEventListener("click", function(){ setLayout(false); });
+layCompact.addEventListener("click", function(){ setLayout(true); });
+
 var CAT = ["#2563a8","#c0392b","#1e8449","#7d4fc9","#d97706","#0e7c86","#b03a6b","#5b7a1e"];
 var YES_COLOR = "#1e8449", NO_COLOR = "#c05a2e";
 var GRAY_FILL = "#c9cfd6";
@@ -2312,25 +2641,11 @@ var QUESTION_SHORT = {
   9: "Firearms Regulation"
 };
 
-/* Main roads, drawn from real Arlington street locations (lon, lat).
-   Simplified centerlines, shown under the precinct colors. */
-var STREETS = [
-  { name: "Massachusetts Ave", pts: [[-71.2075,42.4325],[-71.196,42.4245],[-71.181,42.4175],[-71.166,42.4115],[-71.153,42.4065],[-71.138,42.4005]], label: [-71.174,42.4135], angle: -24 },
-  { name: "Pleasant St", pts: [[-71.2026,42.3988],[-71.186,42.3995],[-71.172,42.4005],[-71.158,42.402],[-71.146,42.4035],[-71.134,42.4055]], label: [-71.186,42.3972], angle: 0 },
-  { name: "Summer St", pts: [[-71.2026,42.4235],[-71.186,42.4255],[-71.168,42.4275],[-71.151,42.4295],[-71.136,42.429]], label: [-71.168,42.4305], angle: 4 },
-  { name: "Broadway", pts: [[-71.1465,42.434],[-71.1475,42.422],[-71.149,42.410],[-71.1505,42.399]], label: [-71.1445,42.416], angle: 88 },
-  { name: "Park Ave", pts: [[-71.177,42.4363],[-71.179,42.426],[-71.182,42.415],[-71.185,42.404],[-71.187,42.398]], label: [-71.1845,42.419], angle: 84 },
-  { name: "Mystic St", pts: [[-71.161,42.4095],[-71.153,42.416],[-71.146,42.423],[-71.141,42.431]], label: [-71.149,42.4195], angle: -48 },
-  { name: "Ridge St", pts: [[-71.164,42.4363],[-71.1625,42.427],[-71.161,42.418],[-71.160,42.411]], label: [-71.1585,42.423], angle: 86 },
-  { name: "Lake St", pts: [[-71.167,42.409],[-71.159,42.4035],[-71.151,42.3985]], label: [-71.156,42.4005], angle: 32 },
-  { name: "Forest St", pts: [[-71.181,42.431],[-71.178,42.422],[-71.1755,42.414],[-71.174,42.407]], label: [-71.173,42.4205], angle: 82 },
-  { name: "Highland Ave", pts: [[-71.197,42.421],[-71.194,42.412],[-71.1915,42.403]], label: [-71.1975,42.412], angle: 80 },
-  { name: "Oakland Ave", pts: [[-71.1545,42.430],[-71.1555,42.420],[-71.1565,42.411]], label: [-71.152,42.4245], angle: 86 },
-  { name: "Warren St", pts: [[-71.2026,42.4125],[-71.191,42.4115],[-71.180,42.411]], label: [-71.195,42.4145], angle: 0 },
-  { name: "Lowell St", pts: [[-71.2026,42.4363],[-71.197,42.428],[-71.1925,42.4205]], label: [-71.2005,42.4295], angle: 52 },
-  { name: "Brattle St", pts: [[-71.177,42.409],[-71.169,42.4055],[-71.162,42.403]], label: [-71.170,42.4085], angle: 18 }
-];
-var SPY_POND = [[-71.171,42.4075],[-71.165,42.4085],[-71.159,42.407],[-71.1575,42.4035],[-71.160,42.4005],[-71.166,42.400],[-71.1705,42.4025]];
+/* Real street network: U.S. Census Bureau TIGER road centerlines,
+   clipped to the Arlington town boundary, plus the real Spy Pond
+   shoreline (MassGIS hydrography). Classes: primary / secondary / local. */
+var MAPDATA = {"streets": {"primary": [[[-71.1569, 42.4028], [-71.1591, 42.4041], [-71.1599, 42.4045]], [[-71.1997, 42.4168], [-71.1963, 42.416], [-71.1942, 42.4154], [-71.1921, 42.4146], [-71.1885, 42.4131], [-71.1856, 42.4121], [-71.1834, 42.4114], [-71.1821, 42.4111], [-71.1774, 42.4102], [-71.1745, 42.4095], [-71.1716, 42.4086], [-71.1661, 42.4065], [-71.1603, 42.4049], [-71.1596, 42.4046], [-71.1593, 42.4044], [-71.1586, 42.404], [-71.1561, 42.4026], [-71.1544, 42.4018], [-71.1527, 42.401]], [[-71.1958, 42.4156], [-71.199, 42.4165], [-71.2004, 42.4168]], [[-71.1569, 42.4028], [-71.1595, 42.4044], [-71.1605, 42.4047]], [[-71.1984, 42.4164], [-71.1998, 42.4167]], [[-71.1997, 42.4168], [-71.1963, 42.416], [-71.1942, 42.4154], [-71.1921, 42.4146], [-71.1885, 42.4131], [-71.1856, 42.4121], [-71.1834, 42.4114], [-71.1821, 42.4111], [-71.1774, 42.4102], [-71.1745, 42.4095], [-71.1716, 42.4086], [-71.1661, 42.4065], [-71.1603, 42.4049], [-71.1596, 42.4046], [-71.1593, 42.4044], [-71.1586, 42.404], [-71.1561, 42.4026], [-71.1544, 42.4018], [-71.1527, 42.401]]], "secondary": [[[-71.1557, 42.4358], [-71.1557, 42.4355], [-71.1556, 42.435], [-71.1546, 42.4318], [-71.1544, 42.4313], [-71.1534, 42.4296], [-71.1524, 42.4277], [-71.1522, 42.427], [-71.1521, 42.4265], [-71.152, 42.4256], [-71.1522, 42.4249], [-71.1525, 42.4245], [-71.1538, 42.4229], [-71.1539, 42.4224], [-71.154, 42.4217], [-71.1538, 42.4212], [-71.1534, 42.4206], [-71.1532, 42.4204], [-71.1528, 42.4203], [-71.1524, 42.42], [-71.1514, 42.4187], [-71.1509, 42.4178], [-71.151, 42.4171]], [[-71.152, 42.4195], [-71.1522, 42.4195], [-71.1534, 42.4192], [-71.154, 42.4192], [-71.1549, 42.4192], [-71.1564, 42.419]], [[-71.158, 42.4192], [-71.1596, 42.4196], [-71.1604, 42.4199], [-71.1607, 42.4201], [-71.1618, 42.4212], [-71.1622, 42.4215], [-71.1646, 42.4228], [-71.1654, 42.423], [-71.1668, 42.4231], [-71.1672, 42.4232], [-71.1689, 42.424], [-71.1706, 42.4247], [-71.1716, 42.4254], [-71.1738, 42.4271], [-71.1741, 42.4273], [-71.1744, 42.4282], [-71.1747, 42.4285], [-71.1751, 42.4288], [-71.1756, 42.4291], [-71.1761, 42.4292], [-71.1784, 42.43], [-71.1792, 42.4303], [-71.1844, 42.4331]], [[-71.158, 42.4192], [-71.1577, 42.419], [-71.1572, 42.4189], [-71.1567, 42.419], [-71.1564, 42.419]], [[-71.1564, 42.419], [-71.1573, 42.419], [-71.158, 42.4192]], [[-71.1564, 42.419], [-71.1573, 42.419], [-71.158, 42.4192]], [[-71.158, 42.4192], [-71.1577, 42.419], [-71.1572, 42.4189], [-71.1567, 42.419], [-71.1564, 42.419]], [[-71.151, 42.4171], [-71.1509, 42.4178], [-71.1514, 42.4187], [-71.1524, 42.42], [-71.1528, 42.4203], [-71.1532, 42.4204], [-71.1534, 42.4206], [-71.1538, 42.4212], [-71.154, 42.4217], [-71.1539, 42.4224], [-71.1538, 42.4229], [-71.1525, 42.4245], [-71.1522, 42.4249], [-71.152, 42.4256], [-71.1521, 42.4265], [-71.1522, 42.427], [-71.1524, 42.4277], [-71.1534, 42.4296], [-71.1544, 42.4313], [-71.1546, 42.4318], [-71.1556, 42.435], [-71.1557, 42.4355], [-71.1557, 42.4358]], [[-71.153, 42.4155], [-71.1513, 42.4166], [-71.1511, 42.4168], [-71.151, 42.4171]], [[-71.1491, 42.4126], [-71.1502, 42.4137], [-71.1514, 42.4147], [-71.1522, 42.415], [-71.1533, 42.4154]], [[-71.1491, 42.4126], [-71.1494, 42.4131], [-71.1497, 42.4134], [-71.1513, 42.4147], [-71.1517, 42.415], [-71.153, 42.4155]], [[-71.137, 42.4015], [-71.1397, 42.4037], [-71.1471, 42.4095], [-71.1474, 42.4099], [-71.1491, 42.4126]], [[-71.1533, 42.4154], [-71.153, 42.4155]], [[-71.1435, 42.4206], [-71.144, 42.4205]], [[-71.144, 42.4205], [-71.1435, 42.4204]], [[-71.1627, 42.4066], [-71.163, 42.4062]], [[-71.144, 42.4205], [-71.1435, 42.4206]], [[-71.144, 42.4205], [-71.1436, 42.4204]], [[-71.1489, 42.4162], [-71.1482, 42.4166], [-71.1473, 42.4172], [-71.1463, 42.4182], [-71.1447, 42.4201], [-71.1444, 42.4204], [-71.144, 42.4205]], [[-71.1514, 42.4166], [-71.1508, 42.4164], [-71.1504, 42.4163], [-71.1497, 42.4162], [-71.1489, 42.4162]], [[-71.1627, 42.4066], [-71.163, 42.4062]], [[-71.1533, 42.4154], [-71.1561, 42.4132], [-71.1566, 42.4128], [-71.1577, 42.4122], [-71.158, 42.4118], [-71.1581, 42.4116], [-71.1582, 42.4103], [-71.1583, 42.41], [-71.1584, 42.4098], [-71.1592, 42.409], [-71.1607, 42.4078], [-71.1622, 42.407], [-71.1627, 42.4066]], [[-71.1491, 42.4126], [-71.1502, 42.4137], [-71.1514, 42.4147], [-71.1522, 42.415], [-71.1533, 42.4154]], [[-71.1491, 42.4126], [-71.1494, 42.4131], [-71.1497, 42.4134], [-71.1513, 42.4147], [-71.1517, 42.415], [-71.153, 42.4155]], [[-71.137, 42.4015], [-71.1397, 42.4037], [-71.1471, 42.4095], [-71.1474, 42.4099], [-71.1491, 42.4126]], [[-71.1508, 42.4164], [-71.1497, 42.4162], [-71.1491, 42.4162], [-71.1489, 42.4162], [-71.1482, 42.4166], [-71.1473, 42.4172], [-71.1463, 42.4182], [-71.1445, 42.4203], [-71.1444, 42.4204], [-71.144, 42.4205]], [[-71.1533, 42.4154], [-71.1529, 42.4158], [-71.1513, 42.4167], [-71.151, 42.4171]], [[-71.153, 42.4155], [-71.1513, 42.4166], [-71.1511, 42.4168], [-71.151, 42.4171]], [[-71.1533, 42.4154], [-71.153, 42.4155]], [[-71.137, 42.4015], [-71.1397, 42.4037], [-71.1471, 42.4095], [-71.1474, 42.4099], [-71.1491, 42.4126]], [[-71.151, 42.4171], [-71.1509, 42.4178], [-71.1514, 42.4187], [-71.1524, 42.42], [-71.1528, 42.4203], [-71.1532, 42.4204], [-71.1534, 42.4206], [-71.1538, 42.4212], [-71.154, 42.4217], [-71.1539, 42.4224], [-71.1538, 42.4229], [-71.1525, 42.4245], [-71.1522, 42.4249], [-71.152, 42.4256], [-71.1521, 42.4265], [-71.1522, 42.427], [-71.1524, 42.4277], [-71.1534, 42.4296], [-71.1544, 42.4313], [-71.1546, 42.4318], [-71.1556, 42.435], [-71.1557, 42.4355], [-71.1557, 42.4358]], [[-71.1491, 42.4126], [-71.1502, 42.4137], [-71.1514, 42.4147], [-71.1522, 42.415], [-71.1533, 42.4154], [-71.1529, 42.4158], [-71.1513, 42.4167], [-71.151, 42.4171]], [[-71.151, 42.4171], [-71.1511, 42.4168], [-71.1513, 42.4166], [-71.153, 42.4155], [-71.1517, 42.415], [-71.1513, 42.4147], [-71.1497, 42.4134], [-71.1494, 42.4131], [-71.1491, 42.4126]], [[-71.137, 42.4015], [-71.1397, 42.4037], [-71.1471, 42.4095], [-71.1474, 42.4099], [-71.1491, 42.4126]], [[-71.1522, 42.4198], [-71.1525, 42.4195], [-71.1527, 42.4194]], [[-71.1522, 42.4198], [-71.1525, 42.4195], [-71.1527, 42.4194]], [[-71.1491, 42.4126], [-71.1502, 42.4137], [-71.1514, 42.4147], [-71.1522, 42.415], [-71.1533, 42.4154]], [[-71.153, 42.4155], [-71.1517, 42.415], [-71.1513, 42.4147], [-71.1497, 42.4134], [-71.1494, 42.4131], [-71.1491, 42.4126]], [[-71.1527, 42.4194], [-71.1531, 42.4193], [-71.1534, 42.4192], [-71.154, 42.4192], [-71.1549, 42.4192], [-71.1564, 42.419]], [[-71.158, 42.4192], [-71.1596, 42.4196], [-71.1604, 42.4199], [-71.1607, 42.4201], [-71.1618, 42.4212], [-71.1622, 42.4215], [-71.1646, 42.4228], [-71.1654, 42.423], [-71.1668, 42.4231], [-71.1672, 42.4232], [-71.1689, 42.424], [-71.1706, 42.4247], [-71.1716, 42.4254], [-71.1738, 42.4271], [-71.1741, 42.4273], [-71.1744, 42.4282], [-71.1747, 42.4285], [-71.1751, 42.4288], [-71.1756, 42.4291], [-71.1761, 42.4292], [-71.1784, 42.43], [-71.1792, 42.4303], [-71.1838, 42.4327]], [[-71.1519, 42.4162], [-71.1512, 42.4167], [-71.151, 42.4171], [-71.1513, 42.4167], [-71.1529, 42.4158], [-71.1533, 42.4154], [-71.153, 42.4155], [-71.1519, 42.4162]], [[-71.1533, 42.4154], [-71.1529, 42.4158], [-71.1513, 42.4167], [-71.151, 42.4171]], [[-71.151, 42.4171], [-71.1509, 42.4178], [-71.1514, 42.4187], [-71.1518, 42.4192], [-71.152, 42.4195], [-71.1521, 42.4195], [-71.1527, 42.4194]], [[-71.1533, 42.4154], [-71.1529, 42.4158], [-71.1514, 42.4166], [-71.1508, 42.4164]], [[-71.1533, 42.4154], [-71.153, 42.4155], [-71.1516, 42.4164], [-71.1514, 42.4165], [-71.1508, 42.4164]], [[-71.1533, 42.4154], [-71.1561, 42.4132], [-71.1566, 42.4128], [-71.1577, 42.4122], [-71.158, 42.4118], [-71.1581, 42.4116], [-71.1582, 42.4103], [-71.1583, 42.41], [-71.1584, 42.4098], [-71.1592, 42.409], [-71.1607, 42.4078], [-71.1622, 42.407], [-71.1627, 42.4066]]], "local": [[[-71.1608, 42.4117], [-71.16, 42.4127]], [[-71.162, 42.4115], [-71.1614, 42.4109], [-71.1588, 42.4095]], [[-71.1904, 42.4194], [-71.1905, 42.4196]], [[-71.1489, 42.4057], [-71.1506, 42.4054], [-71.1528, 42.4046], [-71.154, 42.4043]], [[-71.156, 42.4316], [-71.1568, 42.4315], [-71.1576, 42.4317], [-71.1587, 42.4324], [-71.16, 42.4331], [-71.1618, 42.4343], [-71.1637, 42.4353], [-71.1646, 42.4359]], [[-71.1918, 42.4148], [-71.1902, 42.414], [-71.1828, 42.4115], [-71.1767, 42.4103], [-71.1713, 42.4088], [-71.1672, 42.4072], [-71.1629, 42.4059], [-71.1604, 42.4051], [-71.1587, 42.4042]], [[-71.1803, 42.4157], [-71.1842, 42.4163]], [[-71.1498, 42.4176], [-71.1496, 42.4174]], [[-71.1673, 42.419], [-71.1708, 42.4162], [-71.174, 42.4134]], [[-71.1909, 42.4254], [-71.1912, 42.425], [-71.1916, 42.4247], [-71.1917, 42.4239], [-71.1925, 42.4229], [-71.1929, 42.4226], [-71.1937, 42.4213]], [[-71.1763, 42.4351], [-71.1754, 42.4345]], [[-71.1632, 42.4332], [-71.1644, 42.4327], [-71.1654, 42.4327], [-71.1659, 42.4326], [-71.1663, 42.4324], [-71.1669, 42.4318]], [[-71.1572, 42.4237], [-71.157, 42.4237], [-71.157, 42.4236]], [[-71.1436, 42.4191], [-71.145, 42.4197]], [[-71.1668, 42.407], [-71.1639, 42.4059]], [[-71.1842, 42.4284], [-71.1829, 42.4288]], [[-71.1739, 42.4228], [-71.175, 42.4219]], [[-71.157, 42.4236], [-71.1567, 42.4236]], [[-71.1475, 42.4209], [-71.1474, 42.4212]], [[-71.1489, 42.4221], [-71.1482, 42.4218]], [[-71.1526, 42.4294], [-71.1532, 42.4292]], [[-71.157, 42.4029], [-71.1586, 42.4035], [-71.1588, 42.4035], [-71.159, 42.4034], [-71.1591, 42.4031]], [[-71.1717, 42.4326], [-71.1701, 42.4336], [-71.1699, 42.4339]], [[-71.1594, 42.4241], [-71.1586, 42.4238]], [[-71.15, 42.4038], [-71.1509, 42.4067], [-71.1512, 42.407]], [[-71.1503, 42.4203], [-71.15, 42.4204]], [[-71.1389, 42.4076], [-71.1383, 42.4071], [-71.1364, 42.4052]], [[-71.1898, 42.4229], [-71.1894, 42.4235]], [[-71.1514, 42.4147], [-71.1513, 42.4147]], [[-71.1369, 42.4119], [-71.1356, 42.4132], [-71.1343, 42.4125]], [[-71.1752, 42.432], [-71.175, 42.4331]], [[-71.1481, 42.4211], [-71.1482, 42.4218]], [[-71.1727, 42.4297], [-71.172, 42.4292]], [[-71.1345, 42.41], [-71.1333, 42.4093]], [[-71.1529, 42.4158], [-71.1515, 42.4153]], [[-71.1561, 42.4132], [-71.1571, 42.4138]], [[-71.1623, 42.4249], [-71.1638, 42.4257]], [[-71.178, 42.4243], [-71.1772, 42.4253]], [[-71.1639, 42.4102], [-71.1641, 42.4091], [-71.1644, 42.4085], [-71.1651, 42.4079], [-71.1662, 42.4072]], [[-71.1486, 42.4041], [-71.1472, 42.4012]], [[-71.1665, 42.4334], [-71.1667, 42.4335], [-71.1669, 42.4335]], [[-71.1791, 42.413], [-71.1762, 42.4114]], [[-71.1849, 42.4228], [-71.1837, 42.4196], [-71.1833, 42.419], [-71.1817, 42.4171], [-71.1814, 42.4165], [-71.1815, 42.4162], [-71.1818, 42.4155], [-71.1824, 42.415], [-71.1865, 42.413]], [[-71.1818, 42.4261], [-71.1834, 42.4236], [-71.1835, 42.4231], [-71.1827, 42.4205], [-71.1823, 42.4198], [-71.1803, 42.4173], [-71.1801, 42.4168], [-71.1801, 42.4164], [-71.1803, 42.4157], [-71.18, 42.4152], [-71.1805, 42.4152], [-71.1813, 42.4145]], [[-71.158, 42.4118], [-71.1566, 42.4109]], [[-71.1666, 42.4252], [-71.1674, 42.4256]], [[-71.1347, 42.4074], [-71.1337, 42.4083], [-71.1335, 42.4086], [-71.1332, 42.41], [-71.1332, 42.4104], [-71.1336, 42.4115], [-71.1337, 42.4126]], [[-71.1417, 42.4119], [-71.1434, 42.4128]], [[-71.1621, 42.4145], [-71.1623, 42.4143], [-71.1626, 42.4144]], [[-71.1836, 42.4286], [-71.1833, 42.4283], [-71.1825, 42.428]], [[-71.1899, 42.4248], [-71.1911, 42.4249]], [[-71.1714, 42.4212], [-71.1701, 42.4228], [-71.1709, 42.4233]], [[-71.1627, 42.4308], [-71.1616, 42.4303], [-71.1606, 42.4288], [-71.1606, 42.4284], [-71.1604, 42.4282], [-71.1602, 42.4281], [-71.1595, 42.4283]], [[-71.1423, 42.4058], [-71.1468, 42.4043], [-71.1481, 42.4042], [-71.1546, 42.4028], [-71.1574, 42.4025], [-71.158, 42.4026]], [[-71.1479, 42.4108], [-71.1476, 42.4109], [-71.1447, 42.4132]], [[-71.1784, 42.4211], [-71.1802, 42.4217]], [[-71.1555, 42.4171], [-71.1554, 42.4174], [-71.1551, 42.4173]], [[-71.1572, 42.419], [-71.1569, 42.4222], [-71.1571, 42.4236]], [[-71.1389, 42.4103], [-71.1385, 42.4101], [-71.1382, 42.4101], [-71.138, 42.4099]], [[-71.1571, 42.4236], [-71.157, 42.4236]], [[-71.1525, 42.4245], [-71.15, 42.4233]], [[-71.1643, 42.4339], [-71.1663, 42.4335], [-71.1665, 42.4334], [-71.1665, 42.4331], [-71.1677, 42.4324]], [[-71.1715, 42.4166], [-71.1748, 42.4138]], [[-71.1459, 42.4186], [-71.1468, 42.419], [-71.1463, 42.4212]], [[-71.176, 42.4316], [-71.1774, 42.4328]], [[-71.164, 42.4095], [-71.1662, 42.4081], [-71.1672, 42.4077]], [[-71.1387, 42.4127], [-71.1373, 42.412]], [[-71.1798, 42.4195], [-71.1813, 42.42]], [[-71.1692, 42.42], [-71.1705, 42.4191]], [[-71.1463, 42.4019], [-71.1475, 42.4017]], [[-71.1791, 42.4294], [-71.1784, 42.429]], [[-71.1656, 42.4137], [-71.1657, 42.413], [-71.1661, 42.4118], [-71.1659, 42.4115]], [[-71.1542, 42.4174], [-71.1554, 42.4179], [-71.1549, 42.4181], [-71.1541, 42.4178]], [[-71.1689, 42.424], [-71.1688, 42.4242]], [[-71.1384, 42.4092], [-71.1384, 42.4093], [-71.1377, 42.4103]], [[-71.1921, 42.4189], [-71.1917, 42.4183], [-71.1921, 42.4175], [-71.1917, 42.4167]], [[-71.1644, 42.4085], [-71.1634, 42.4079]], [[-71.1534, 42.4192], [-71.1532, 42.4204]], [[-71.1502, 42.4209], [-71.1494, 42.4209]], [[-71.1775, 42.4361], [-71.1773, 42.4356], [-71.1766, 42.4349]], [[-71.1506, 42.4203], [-71.1503, 42.4203]], [[-71.1925, 42.4217], [-71.1899, 42.4201]], [[-71.1491, 42.422], [-71.1489, 42.4221]], [[-71.1994, 42.4162], [-71.1992, 42.4164]], [[-71.1488, 42.4151], [-71.1497, 42.4159]], [[-71.144, 42.4071], [-71.1427, 42.4079], [-71.1401, 42.41]], [[-71.1476, 42.4102], [-71.1471, 42.4104], [-71.145, 42.4122]], [[-71.1979, 42.4167], [-71.1969, 42.4177], [-71.1962, 42.4185], [-71.1946, 42.4186], [-71.1936, 42.4188]], [[-71.1727, 42.4347], [-71.1741, 42.4358]], [[-71.1411, 42.4164], [-71.1419, 42.4169]], [[-71.149, 42.4187], [-71.1489, 42.4192], [-71.1486, 42.4197]], [[-71.1485, 42.4202], [-71.1481, 42.4202]], [[-71.1468, 42.4079], [-71.148, 42.409], [-71.1481, 42.4094]], [[-71.1758, 42.4264], [-71.1759, 42.4266], [-71.1764, 42.4269], [-71.1804, 42.4294]], [[-71.1522, 42.4249], [-71.1513, 42.4246], [-71.1498, 42.4239], [-71.1491, 42.4237]], [[-71.1835, 42.4233], [-71.1898, 42.4213], [-71.1902, 42.4211], [-71.1907, 42.4206], [-71.1924, 42.4185], [-71.193, 42.4174], [-71.1939, 42.4168]], [[-71.1481, 42.418], [-71.1475, 42.419]], [[-71.1886, 42.4238], [-71.1877, 42.4235]], [[-71.157, 42.4231], [-71.1566, 42.4231], [-71.1563, 42.4228], [-71.156, 42.4226]], [[-71.1502, 42.4198], [-71.1518, 42.4192]], [[-71.1443, 42.4194], [-71.1451, 42.4184]], [[-71.1429, 42.4133], [-71.1412, 42.4124]], [[-71.1487, 42.4206], [-71.1485, 42.4213]], [[-71.1494, 42.4209], [-71.1487, 42.4206]], [[-71.1536, 42.4057], [-71.1539, 42.4063]], [[-71.17, 42.4116], [-71.1709, 42.4111], [-71.1715, 42.4111], [-71.1718, 42.4106]], [[-71.176, 42.4236], [-71.1757, 42.4227], [-71.1755, 42.4223], [-71.1742, 42.4212]], [[-71.1454, 42.4192], [-71.1466, 42.4197]], [[-71.1391, 42.4032], [-71.1421, 42.4012]], [[-71.1575, 42.4123], [-71.1562, 42.4111]], [[-71.1627, 42.4171], [-71.1631, 42.4159], [-71.1643, 42.415]], [[-71.1482, 42.4059], [-71.148, 42.4061], [-71.148, 42.4062], [-71.1485, 42.4073], [-71.1487, 42.4086], [-71.1489, 42.4094]], [[-71.1387, 42.4127], [-71.1402, 42.4134]], [[-71.179, 42.4154], [-71.1775, 42.4146]], [[-71.172, 42.4096], [-71.1712, 42.4101]], [[-71.1594, 42.4241], [-71.1601, 42.4239], [-71.1605, 42.4236]], [[-71.1762, 42.4252], [-71.176, 42.4256]], [[-71.1771, 42.4239], [-71.1764, 42.4249]], [[-71.1612, 42.4169], [-71.1612, 42.4175], [-71.162, 42.4177], [-71.1632, 42.4177]], [[-71.1683, 42.4308], [-71.1703, 42.4319]], [[-71.1621, 42.4276], [-71.1636, 42.427]], [[-71.1662, 42.4072], [-71.1672, 42.4077], [-71.1687, 42.4079], [-71.1696, 42.4083], [-71.1705, 42.4089], [-71.1709, 42.4094], [-71.1712, 42.4101]], [[-71.1506, 42.4164], [-71.1496, 42.4174]], [[-71.154, 42.4036], [-71.154, 42.4046], [-71.1544, 42.4055]], [[-71.1799, 42.4264], [-71.1766, 42.4297], [-71.1761, 42.4299], [-71.1749, 42.4302]], [[-71.156, 42.4032], [-71.1558, 42.4037], [-71.1554, 42.4055], [-71.1552, 42.4059], [-71.1542, 42.4063], [-71.1527, 42.4067], [-71.1511, 42.4068]], [[-71.1561, 42.4286], [-71.1567, 42.4284], [-71.157, 42.4278], [-71.1582, 42.4274], [-71.1589, 42.4269]], [[-71.1471, 42.4037], [-71.1545, 42.4022]], [[-71.1663, 42.4176], [-71.1672, 42.4171], [-71.1676, 42.4172], [-71.1686, 42.4179]], [[-71.2009, 42.4164], [-71.2007, 42.4158]], [[-71.1689, 42.408], [-71.1687, 42.4083], [-71.168, 42.4088]], [[-71.1648, 42.4228], [-71.1646, 42.423], [-71.1645, 42.4231]], [[-71.1415, 42.4171], [-71.1419, 42.4169], [-71.1452, 42.4137]], [[-71.1814, 42.4186], [-71.1799, 42.4192], [-71.1798, 42.4195], [-71.1797, 42.4203]], [[-71.1813, 42.4145], [-71.1818, 42.4141], [-71.1821, 42.4136]], [[-71.1534, 42.4234], [-71.1561, 42.4245], [-71.1562, 42.4246], [-71.1562, 42.4255], [-71.1568, 42.4265]], [[-71.1592, 42.409], [-71.1613, 42.4102], [-71.1615, 42.4101], [-71.1618, 42.4098], [-71.162, 42.4099], [-71.1623, 42.41], [-71.1623, 42.4103], [-71.1614, 42.4109]], [[-71.1834, 42.4236], [-71.1845, 42.4239], [-71.1863, 42.4239], [-71.1869, 42.4242], [-71.1882, 42.4251]], [[-71.1494, 42.4181], [-71.1492, 42.4181]], [[-71.168, 42.4194], [-71.1676, 42.4198]], [[-71.1704, 42.4324], [-71.1698, 42.4329], [-71.1712, 42.4341], [-71.1718, 42.4352]], [[-71.161, 42.4324], [-71.1634, 42.4317], [-71.1646, 42.4314], [-71.165, 42.4314], [-71.1657, 42.4317]], [[-71.1649, 42.436], [-71.1664, 42.4353], [-71.169, 42.4344], [-71.1699, 42.4339]], [[-71.1387, 42.4127], [-71.1373, 42.412]], [[-71.1818, 42.4119], [-71.1775, 42.4112], [-71.1771, 42.4111], [-71.1764, 42.4104]], [[-71.1721, 42.4264], [-71.1717, 42.4263], [-71.1714, 42.4264], [-71.1687, 42.4292]], [[-71.1547, 42.416], [-71.1541, 42.4178]], [[-71.1363, 42.4131], [-71.1377, 42.4138]], [[-71.1627, 42.4066], [-71.1631, 42.4068], [-71.1641, 42.4072], [-71.1651, 42.4079]], [[-71.1725, 42.4261], [-71.1721, 42.4264], [-71.1722, 42.4268], [-71.1721, 42.427], [-71.1695, 42.4297], [-71.1669, 42.4318]], [[-71.1833, 42.4347], [-71.1816, 42.4346], [-71.1806, 42.4343], [-71.1793, 42.4345], [-71.1782, 42.4342], [-71.1774, 42.4341]], [[-71.1791, 42.4227], [-71.1791, 42.4222], [-71.1786, 42.4214], [-71.1783, 42.4208], [-71.1784, 42.4194], [-71.1789, 42.4188], [-71.188, 42.4146], [-71.1882, 42.4144]], [[-71.1791, 42.4261], [-71.1761, 42.4292], [-71.1757, 42.4294], [-71.1747, 42.4296]], [[-71.1382, 42.4132], [-71.1368, 42.4125]], [[-71.1434, 42.4054], [-71.1461, 42.4075]], [[-71.1798, 42.4109], [-71.1796, 42.4116], [-71.1783, 42.4126], [-71.1775, 42.4134]], [[-71.1779, 42.4256], [-71.1795, 42.4255], [-71.1799, 42.4252]], [[-71.159, 42.4081], [-71.1578, 42.4079], [-71.1576, 42.4081]], [[-71.1646, 42.4236], [-71.1648, 42.4236], [-71.1668, 42.4249]], [[-71.1542, 42.4029], [-71.1538, 42.4021], [-71.1534, 42.4018]], [[-71.1539, 42.4221], [-71.1543, 42.4222], [-71.1555, 42.4232], [-71.1568, 42.4236], [-71.157, 42.4237], [-71.1573, 42.4242], [-71.1571, 42.4252], [-71.1574, 42.4256], [-71.1586, 42.4269], [-71.1602, 42.4272], [-71.1609, 42.4276], [-71.1615, 42.4281], [-71.162, 42.4293], [-71.1625, 42.4298], [-71.1633, 42.4301], [-71.1649, 42.4301]], [[-71.1579, 42.4164], [-71.1592, 42.4147], [-71.1612, 42.4128], [-71.1619, 42.4116], [-71.1637, 42.4103], [-71.1648, 42.4099], [-71.1671, 42.4083], [-71.1672, 42.4077], [-71.1662, 42.4072]], [[-71.1513, 42.4201], [-71.1516, 42.4204], [-71.1514, 42.4206], [-71.1513, 42.4206], [-71.1505, 42.4207], [-71.1503, 42.4203]], [[-71.1773, 42.4233], [-71.1762, 42.4216], [-71.176, 42.4213], [-71.1761, 42.4209]], [[-71.1543, 42.4206], [-71.1564, 42.4205], [-71.1564, 42.4212]], [[-71.1371, 42.4085], [-71.1353, 42.4103], [-71.1342, 42.4125], [-71.1338, 42.4139]], [[-71.1591, 42.4166], [-71.159, 42.417], [-71.1591, 42.4172]], [[-71.1907, 42.4243], [-71.1933, 42.4205]], [[-71.1605, 42.4222], [-71.1604, 42.4226], [-71.1597, 42.4231], [-71.1596, 42.4233], [-71.1594, 42.4238], [-71.1594, 42.4244], [-71.1597, 42.4249], [-71.1629, 42.4267], [-71.1628, 42.4269], [-71.162, 42.4273], [-71.162, 42.4274], [-71.1621, 42.4276]], [[-71.1417, 42.4053], [-71.1375, 42.4087]], [[-71.1972, 42.4205], [-71.1961, 42.4202]], [[-71.1685, 42.422], [-71.169, 42.4224], [-71.1692, 42.4226], [-71.169, 42.4255], [-71.1692, 42.4264], [-71.172, 42.4331], [-71.1722, 42.4342], [-71.1724, 42.4344], [-71.1731, 42.435]], [[-71.1737, 42.4177], [-71.1768, 42.4152], [-71.1782, 42.4138]], [[-71.1522, 42.4249], [-71.1531, 42.4255]], [[-71.1661, 42.4261], [-71.1654, 42.4256], [-71.1651, 42.4256]], [[-71.1364, 42.4064], [-71.136, 42.4069]], [[-71.1358, 42.4069], [-71.1358, 42.4071]], [[-71.1759, 42.4188], [-71.1788, 42.4164]], [[-71.1714, 42.4212], [-71.1754, 42.4183], [-71.1782, 42.416]], [[-71.1483, 42.4114], [-71.148, 42.4115], [-71.1452, 42.4137]], [[-71.1477, 42.4169], [-71.1476, 42.4167], [-71.147, 42.4165], [-71.1466, 42.4166], [-71.1459, 42.417], [-71.1453, 42.417]], [[-71.1521, 42.4163], [-71.1517, 42.4161]], [[-71.153, 42.4289], [-71.1525, 42.429], [-71.1528, 42.4296]], [[-71.1571, 42.4236], [-71.1572, 42.4237]], [[-71.1392, 42.4034], [-71.1366, 42.4054]], [[-71.1347, 42.4115], [-71.1334, 42.4109]], [[-71.1539, 42.4221], [-71.152, 42.4219]], [[-71.1746, 42.4233], [-71.1758, 42.4256], [-71.1757, 42.426], [-71.1743, 42.4271], [-71.1742, 42.4276]], [[-71.1746, 42.4233], [-71.1756, 42.4225]], [[-71.1678, 42.4193], [-71.1676, 42.4196], [-71.1676, 42.4198]], [[-71.1889, 42.4201], [-71.1891, 42.4205], [-71.1893, 42.4214]], [[-71.166, 42.4354], [-71.1663, 42.4357], [-71.1667, 42.4357], [-71.169, 42.4358], [-71.1694, 42.4357]], [[-71.1495, 42.4094], [-71.1496, 42.4094]], [[-71.1582, 42.4115], [-71.1588, 42.4118], [-71.1593, 42.4125], [-71.1629, 42.4135], [-71.1638, 42.4139]], [[-71.1563, 42.413], [-71.1544, 42.4113]], [[-71.1701, 42.4138], [-71.1697, 42.4135], [-71.1693, 42.4129], [-71.1696, 42.412], [-71.1697, 42.4119]], [[-71.172, 42.4104], [-71.1724, 42.4097]], [[-71.1405, 42.4044], [-71.1377, 42.4065]], [[-71.1992, 42.4169], [-71.1963, 42.416]], [[-71.1582, 42.4108], [-71.1642, 42.413], [-71.1743, 42.418], [-71.1767, 42.4192], [-71.1783, 42.4202]], [[-71.1699, 42.4317], [-71.1692, 42.4324], [-71.1689, 42.4324], [-71.1685, 42.432], [-71.1693, 42.4314]], [[-71.1554, 42.4179], [-71.1574, 42.4185]], [[-71.1469, 42.4031], [-71.148, 42.4029]], [[-71.1738, 42.4157], [-71.1729, 42.4164]], [[-71.1721, 42.43], [-71.1718, 42.43], [-71.171, 42.4308]], [[-71.1419, 42.4055], [-71.1438, 42.4042], [-71.1457, 42.4036]], [[-71.188, 42.4146], [-71.1899, 42.4169]], [[-71.1609, 42.4149], [-71.1649, 42.4166], [-71.1669, 42.4181]], [[-71.1763, 42.431], [-71.1778, 42.432]], [[-71.1584, 42.4098], [-71.1588, 42.4099], [-71.1594, 42.4105]], [[-71.1392, 42.4121], [-71.1407, 42.4129]], [[-71.157, 42.421], [-71.1576, 42.421], [-71.1581, 42.4209], [-71.1587, 42.4209]], [[-71.1466, 42.4149], [-71.1475, 42.4142], [-71.1471, 42.414]], [[-71.191, 42.4157], [-71.1898, 42.4152], [-71.1882, 42.4144], [-71.1878, 42.4141], [-71.1878, 42.4138], [-71.1882, 42.4136], [-71.1884, 42.4137], [-71.1901, 42.4146], [-71.1912, 42.4151]], [[-71.1665, 42.4167], [-71.1655, 42.416]], [[-71.1521, 42.4033], [-71.1514, 42.4018], [-71.1512, 42.4016]], [[-71.1678, 42.4156], [-71.1667, 42.4149]], [[-71.1684, 42.4273], [-71.1673, 42.4285]], [[-71.1873, 42.4199], [-71.1871, 42.4197], [-71.1882, 42.419], [-71.1893, 42.4179]], [[-71.1433, 42.4066], [-71.1394, 42.4097]], [[-71.1358, 42.4069], [-71.1349, 42.4065]], [[-71.1655, 42.4306], [-71.1677, 42.4324], [-71.1699, 42.4339], [-71.1706, 42.4348], [-71.1711, 42.4356]], [[-71.1413, 42.4051], [-71.1436, 42.4036], [-71.1454, 42.4029]], [[-71.1696, 42.4275], [-71.169, 42.4277], [-71.1679, 42.4288]], [[-71.1882, 42.4244], [-71.1884, 42.4244]], [[-71.1563, 42.4292], [-71.157, 42.4292], [-71.1577, 42.429]], [[-71.1813, 42.4294], [-71.1831, 42.4321], [-71.1831, 42.4323]], [[-71.1669, 42.4335], [-71.1672, 42.4341], [-71.1686, 42.4357]], [[-71.1994, 42.4162], [-71.199, 42.4162], [-71.198, 42.4158], [-71.1977, 42.4143]], [[-71.1662, 42.427], [-71.1658, 42.4275], [-71.1654, 42.4284], [-71.1656, 42.4294], [-71.1683, 42.4308]], [[-71.1725, 42.4218], [-71.1729, 42.4215], [-71.1742, 42.4212], [-71.1745, 42.421], [-71.1746, 42.4208], [-71.1747, 42.4202], [-71.1754, 42.4195], [-71.1759, 42.4188]], [[-71.1415, 42.4107], [-71.1484, 42.4164]], [[-71.1486, 42.4119], [-71.1453, 42.4145], [-71.1437, 42.416], [-71.142, 42.4179]], [[-71.1841, 42.4272], [-71.1818, 42.4261]], [[-71.1444, 42.4009], [-71.1451, 42.4019], [-71.1461, 42.4045], [-71.1474, 42.4065]], [[-71.1712, 42.4101], [-71.1713, 42.4108], [-71.1724, 42.4111], [-71.1725, 42.411]], [[-71.1883, 42.4217], [-71.1879, 42.4204]], [[-71.1689, 42.4311], [-71.1681, 42.4317]], [[-71.1443, 42.3991], [-71.1445, 42.3997]], [[-71.1731, 42.4325], [-71.1732, 42.4327], [-71.1735, 42.4326], [-71.1735, 42.4324], [-71.1734, 42.4323], [-71.1732, 42.4323], [-71.1731, 42.4325]], [[-71.1584, 42.4098], [-71.1588, 42.4099], [-71.1594, 42.4105]], [[-71.1385, 42.4028], [-71.1416, 42.4007], [-71.1441, 42.3993]], [[-71.1516, 42.4118], [-71.1519, 42.4123]], [[-71.1379, 42.4136], [-71.1393, 42.4144]], [[-71.1804, 42.4227], [-71.1803, 42.4214], [-71.1812, 42.4205]], [[-71.1548, 42.4035], [-71.1526, 42.4039], [-71.1514, 42.4044]], [[-71.1778, 42.432], [-71.1776, 42.4323], [-71.1782, 42.4328], [-71.1783, 42.4335]], [[-71.1798, 42.4234], [-71.1818, 42.4237]], [[-71.1759, 42.4325], [-71.1733, 42.4305], [-71.173, 42.4301]], [[-71.1472, 42.4173], [-71.1479, 42.4178], [-71.1481, 42.418]], [[-71.151, 42.4196], [-71.1513, 42.4201]], [[-71.1706, 42.4247], [-71.1699, 42.4254]], [[-71.1823, 42.4309], [-71.182, 42.4309], [-71.1816, 42.4311], [-71.1813, 42.4314]], [[-71.1443, 42.4119], [-71.1404, 42.416]], [[-71.1369, 42.4075], [-71.1364, 42.408], [-71.1354, 42.4075]], [[-71.152, 42.4219], [-71.1512, 42.4223], [-71.1505, 42.4228]], [[-71.1644, 42.4185], [-71.165, 42.4179]], [[-71.1826, 42.4292], [-71.1836, 42.4308]], [[-71.1714, 42.4318], [-71.1723, 42.4315]], [[-71.1979, 42.4149], [-71.1956, 42.4144], [-71.1953, 42.4145]], [[-71.1392, 42.4053], [-71.1399, 42.4058]], [[-71.1628, 42.4109], [-71.1644, 42.4119]], [[-71.1516, 42.4293], [-71.1505, 42.4301], [-71.1499, 42.4303], [-71.1499, 42.4306], [-71.1493, 42.4306]], [[-71.1529, 42.424], [-71.1504, 42.4227], [-71.15, 42.4228], [-71.15, 42.4229]], [[-71.1755, 42.4268], [-71.1749, 42.4271], [-71.1747, 42.4273], [-71.1746, 42.4275], [-71.1747, 42.4279]], [[-71.1801, 42.4164], [-71.1793, 42.4166], [-71.1791, 42.4165], [-71.1745, 42.414]], [[-71.201, 42.4164], [-71.2005, 42.4166]], [[-71.1334, 42.4139], [-71.1334, 42.4141], [-71.1337, 42.4145], [-71.1337, 42.4146]], [[-71.1786, 42.4114], [-71.1775, 42.4122], [-71.1767, 42.413]], [[-71.1704, 42.4261], [-71.1699, 42.4267], [-71.1694, 42.4268]], [[-71.152, 42.4256], [-71.1515, 42.4255], [-71.1496, 42.4245], [-71.1492, 42.4245], [-71.1491, 42.4247], [-71.1491, 42.4249], [-71.1493, 42.4252], [-71.1509, 42.4264], [-71.1513, 42.4265], [-71.1521, 42.4265]], [[-71.1722, 42.4207], [-71.1733, 42.4214]], [[-71.1847, 42.4333], [-71.1839, 42.4337], [-71.1833, 42.4347]], [[-71.1698, 42.4203], [-71.1715, 42.419]], [[-71.1668, 42.4224], [-71.1666, 42.4218], [-71.166, 42.4217]], [[-71.1576, 42.4094], [-71.1582, 42.4088], [-71.159, 42.4081]], [[-71.1436, 42.4202], [-71.1436, 42.4205], [-71.1434, 42.4208]], [[-71.1747, 42.4353], [-71.1728, 42.4337], [-71.1727, 42.4329], [-71.1729, 42.4326], [-71.1731, 42.4325]], [[-71.1502, 42.4198], [-71.1506, 42.4203]], [[-71.1654, 42.4284], [-71.1708, 42.4314], [-71.1711, 42.4312]], [[-71.1495, 42.4039], [-71.15, 42.4055]], [[-71.167, 42.4189], [-71.1663, 42.4196]], [[-71.1542, 42.4063], [-71.1543, 42.4066], [-71.1539, 42.4071]], [[-71.1894, 42.4227], [-71.1901, 42.4217]], [[-71.1485, 42.4199], [-71.148, 42.4198], [-71.1476, 42.4198]], [[-71.1764, 42.4269], [-71.1753, 42.4278], [-71.1753, 42.4279]], [[-71.1966, 42.4191], [-71.1971, 42.4197]], [[-71.1848, 42.4191], [-71.1843, 42.4192]], [[-71.1533, 42.4154], [-71.1549, 42.416]], [[-71.1618, 42.417], [-71.1621, 42.4158], [-71.1626, 42.4152], [-71.1637, 42.4143], [-71.1638, 42.4136], [-71.1656, 42.412], [-71.1661, 42.4118]], [[-71.1678, 42.4243], [-71.1671, 42.424]], [[-71.1691, 42.4234], [-71.1679, 42.4228]], [[-71.1827, 42.4294], [-71.1816, 42.4298]], [[-71.1561, 42.4302], [-71.1592, 42.4313], [-71.1595, 42.4316], [-71.1598, 42.432]], [[-71.1632, 42.4213], [-71.1648, 42.4216], [-71.1649, 42.4218]], [[-71.1872, 42.4175], [-71.1827, 42.4121]], [[-71.1811, 42.4279], [-71.1808, 42.4291], [-71.1792, 42.4303]], [[-71.1402, 42.4042], [-71.143, 42.4023], [-71.1448, 42.4015], [-71.1453, 42.4014]], [[-71.1602, 42.4272], [-71.1602, 42.4269], [-71.16, 42.4265], [-71.1599, 42.4264]], [[-71.1669, 42.4335], [-71.1679, 42.4332], [-71.1684, 42.4329]], [[-71.1557, 42.4041], [-71.1549, 42.404]], [[-71.1464, 42.409], [-71.1429, 42.4118]], [[-71.1701, 42.4138], [-71.1731, 42.4152]], [[-71.1676, 42.4198], [-71.1681, 42.42], [-71.1681, 42.4203], [-71.1683, 42.4206], [-71.1684, 42.4209], [-71.1692, 42.4213]], [[-71.1672, 42.4247], [-71.1669, 42.4248], [-71.1664, 42.4254], [-71.1662, 42.4259]], [[-71.1638, 42.4168], [-71.1639, 42.4162], [-71.1648, 42.4155]], [[-71.1578, 42.4171], [-71.1564, 42.4169]], [[-71.1718, 42.4226], [-71.1722, 42.4229], [-71.1727, 42.4231]], [[-71.198, 42.4155], [-71.1956, 42.415]], [[-71.1513, 42.4201], [-71.1506, 42.4203]], [[-71.142, 42.4115], [-71.1417, 42.4114], [-71.1414, 42.4116]], [[-71.1527, 42.4305], [-71.1523, 42.4298], [-71.1516, 42.4293]], [[-71.1753, 42.4308], [-71.1764, 42.4305], [-71.1768, 42.4305], [-71.1784, 42.4314]], [[-71.1678, 42.4243], [-71.1673, 42.4244], [-71.1672, 42.4247]], [[-71.1399, 42.4039], [-71.1372, 42.406]], [[-71.1703, 42.425], [-71.1711, 42.4256]], [[-71.1423, 42.4152], [-71.1427, 42.4154]], [[-71.1816, 42.4229], [-71.1835, 42.4234]], [[-71.1906, 42.4197], [-71.193, 42.4211], [-71.1959, 42.4217]], [[-71.1496, 42.4147], [-71.1497, 42.415], [-71.1492, 42.4154]], [[-71.1745, 42.4181], [-71.1775, 42.4156]], [[-71.169, 42.4277], [-71.1681, 42.427], [-71.1672, 42.4268], [-71.1666, 42.4264], [-71.1662, 42.4264], [-71.1658, 42.4267]], [[-71.1586, 42.4226], [-71.1575, 42.4222]], [[-71.1515, 42.4189], [-71.1501, 42.4189], [-71.15, 42.4193], [-71.1502, 42.4198]], [[-71.1977, 42.4143], [-71.1954, 42.4139], [-71.1949, 42.4139]], [[-71.2007, 42.4167], [-71.2004, 42.4166]], [[-71.1651, 42.4256], [-71.1648, 42.4257], [-71.1641, 42.4262]], [[-71.164, 42.4355], [-71.1647, 42.4349], [-71.1676, 42.434], [-71.1683, 42.4338], [-71.1691, 42.4334]], [[-71.1664, 42.4313], [-71.1654, 42.432], [-71.1646, 42.432], [-71.1639, 42.4323]], [[-71.1733, 42.4267], [-71.173, 42.4269], [-71.173, 42.4271], [-71.1735, 42.4278]], [[-71.1354, 42.4059], [-71.1349, 42.4065]], [[-71.174, 42.4144], [-71.1748, 42.4149]], [[-71.1361, 42.4034], [-71.1374, 42.4043]], [[-71.1762, 42.4103], [-71.1709, 42.4094]], [[-71.1469, 42.4094], [-71.1487, 42.4094]], [[-71.1544, 42.4169], [-71.1552, 42.4171]], [[-71.1863, 42.4283], [-71.1855, 42.4286]], [[-71.1583, 42.4192], [-71.1582, 42.4198], [-71.1579, 42.4198]], [[-71.18, 42.4287], [-71.18, 42.4278]], [[-71.1562, 42.4235], [-71.1555, 42.4248], [-71.1553, 42.4259], [-71.1554, 42.4265], [-71.1559, 42.4274], [-71.1563, 42.4292], [-71.1561, 42.4305], [-71.1556, 42.4313]], [[-71.1419, 42.4169], [-71.1444, 42.4181], [-71.1459, 42.4186]], [[-71.1807, 42.4228], [-71.1812, 42.4227], [-71.1815, 42.4226], [-71.1812, 42.4205], [-71.1814, 42.42], [-71.1816, 42.4197], [-71.1908, 42.416], [-71.191, 42.4158], [-71.191, 42.4155], [-71.1915, 42.4148]], [[-71.136, 42.4069], [-71.1358, 42.4069]], [[-71.1522, 42.415], [-71.1537, 42.4138]], [[-71.1481, 42.4202], [-71.1477, 42.4201]], [[-71.1814, 42.4268], [-71.1813, 42.4274]], [[-71.1758, 42.4117], [-71.1748, 42.4115]], [[-71.1813, 42.4145], [-71.1807, 42.4145]], [[-71.1559, 42.4191], [-71.1557, 42.42], [-71.1555, 42.4216], [-71.1548, 42.4227]], [[-71.1734, 42.4092], [-71.1699, 42.4082]], [[-71.1367, 42.4013], [-71.1364, 42.4017], [-71.1364, 42.4019], [-71.1359, 42.4025]], [[-71.1703, 42.4115], [-71.1716, 42.4117], [-71.172, 42.4123], [-71.174, 42.4134]], [[-71.1891, 42.4205], [-71.1922, 42.4222]], [[-71.1694, 42.419], [-71.1687, 42.4184]], [[-71.1483, 42.4114], [-71.1493, 42.4112], [-71.1494, 42.411], [-71.149, 42.4106], [-71.1479, 42.4108]], [[-71.1584, 42.4098], [-71.1576, 42.4094], [-71.158, 42.4089]], [[-71.1481, 42.4211], [-71.1478, 42.4209], [-71.1475, 42.4209]], [[-71.1604, 42.4168], [-71.161, 42.416], [-71.1619, 42.4153]], [[-71.1459, 42.4086], [-71.148, 42.4071]], [[-71.161, 42.4268], [-71.1613, 42.427], [-71.1614, 42.4272]], [[-71.161, 42.4268], [-71.1608, 42.4264]], [[-71.1731, 42.4113], [-71.1775, 42.4134], [-71.1796, 42.4145]], [[-71.1398, 42.4139], [-71.1423, 42.4152]], [[-71.1488, 42.4027], [-71.1531, 42.4018], [-71.1534, 42.4018]], [[-71.1629, 42.4059], [-71.163, 42.4062]], [[-71.1807, 42.4118], [-71.1794, 42.4127], [-71.1784, 42.4138]], [[-71.1604, 42.4245], [-71.1611, 42.4248], [-71.1622, 42.4246], [-71.1626, 42.4243], [-71.1626, 42.4239], [-71.1621, 42.4237], [-71.1613, 42.4237], [-71.1604, 42.4245]], [[-71.1651, 42.4238], [-71.1656, 42.4233]], [[-71.1796, 42.4263], [-71.1798, 42.4258], [-71.1801, 42.4257], [-71.1807, 42.4257], [-71.181, 42.4258], [-71.1811, 42.4259], [-71.1811, 42.4262]], [[-71.1549, 42.416], [-71.1627, 42.4171], [-71.1635, 42.4173], [-71.1647, 42.4178], [-71.1673, 42.419], [-71.1725, 42.4218], [-71.1744, 42.4232], [-71.1749, 42.4234], [-71.176, 42.4236], [-71.1781, 42.4241], [-71.183, 42.4243], [-71.1875, 42.425], [-71.1897, 42.4254], [-71.1916, 42.4254]], [[-71.158, 42.4096], [-71.1578, 42.41], [-71.1582, 42.4101]], [[-71.1548, 42.4227], [-71.1547, 42.4232], [-71.1534, 42.4248], [-71.1531, 42.4253], [-71.1531, 42.4264], [-71.1534, 42.4276]], [[-71.1582, 42.4113], [-71.1569, 42.4106], [-71.157, 42.4104]], [[-71.1502, 42.4137], [-71.1515, 42.4128]], [[-71.1796, 42.4184], [-71.1792, 42.4178], [-71.1788, 42.417], [-71.1788, 42.4164], [-71.1791, 42.4151], [-71.1796, 42.4145], [-71.1803, 42.4138], [-71.1834, 42.4116]], [[-71.1782, 42.4231], [-71.178, 42.4224], [-71.1773, 42.4214]], [[-71.1357, 42.4098], [-71.1381, 42.4111]], [[-71.145, 42.4079], [-71.1415, 42.4107]], [[-71.1892, 42.4176], [-71.1886, 42.4178], [-71.1885, 42.4177], [-71.1835, 42.4117]], [[-71.1367, 42.4013], [-71.1372, 42.401], [-71.138, 42.4006], [-71.1392, 42.4005]], [[-71.1882, 42.4251], [-71.1897, 42.425], [-71.1903, 42.4241], [-71.1902, 42.4238]], [[-71.136, 42.407], [-71.1358, 42.4071]], [[-71.1747, 42.4268], [-71.1758, 42.4264], [-71.1776, 42.4262], [-71.1785, 42.426], [-71.1788, 42.426], [-71.1801, 42.4264], [-71.1818, 42.4261]], [[-71.1443, 42.4051], [-71.1467, 42.407]], [[-71.1816, 42.4346], [-71.1809, 42.4349], [-71.1796, 42.4357]], [[-71.18, 42.428], [-71.1798, 42.428]], [[-71.1534, 42.4058], [-71.1538, 42.4064]], [[-71.1748, 42.4286], [-71.1745, 42.4288]], [[-71.1475, 42.419], [-71.1475, 42.4195], [-71.1476, 42.4198]], [[-71.189, 42.4267], [-71.1886, 42.4267], [-71.1881, 42.4269], [-71.1873, 42.4274], [-71.1865, 42.4282], [-71.1863, 42.4283]], [[-71.1498, 42.4201], [-71.1485, 42.4202]], [[-71.1486, 42.4197], [-71.1481, 42.4195]], [[-71.15, 42.4204], [-71.1502, 42.4209]], [[-71.1537, 42.428], [-71.1534, 42.4276]], [[-71.1924, 42.4228], [-71.1923, 42.4227], [-71.1918, 42.4227]], [[-71.1865, 42.429], [-71.1821, 42.4306]], [[-71.1725, 42.411], [-71.1731, 42.4113]], [[-71.1549, 42.4023], [-71.1552, 42.4025], [-71.1552, 42.4027]], [[-71.1358, 42.4071], [-71.1354, 42.4075]], [[-71.1364, 42.4064], [-71.1373, 42.4069], [-71.1369, 42.4075]], [[-71.168, 42.4076], [-71.168, 42.4078]], [[-71.1961, 42.4162], [-71.1954, 42.4169], [-71.195, 42.4175]], [[-71.1902, 42.4243], [-71.1929, 42.4244]], [[-71.1497, 42.4132], [-71.1509, 42.4124], [-71.1507, 42.4123]], [[-71.1592, 42.4203], [-71.1597, 42.4204], [-71.1601, 42.4206], [-71.1613, 42.4218]], [[-71.169, 42.4216], [-71.1697, 42.422], [-71.1699, 42.4222]], [[-71.1522, 42.4249], [-71.1537, 42.4258]], [[-71.1654, 42.4284], [-71.1645, 42.4286]], [[-71.1397, 42.4037], [-71.1427, 42.4017], [-71.1449, 42.4007]], [[-71.1744, 42.4271], [-71.1741, 42.4271], [-71.1738, 42.4271]], [[-71.171, 42.4338], [-71.1716, 42.4335]], [[-71.1585, 42.4156], [-71.1591, 42.4159]], [[-71.1579, 42.4164], [-71.1577, 42.4178], [-71.1572, 42.419]], [[-71.1534, 42.4198], [-71.1548, 42.4199], [-71.1571, 42.4197]], [[-71.1814, 42.4361], [-71.1821, 42.4358], [-71.1822, 42.4356]], [[-71.1653, 42.4264], [-71.1653, 42.4266], [-71.1649, 42.427], [-71.1645, 42.4271], [-71.1633, 42.4279], [-71.1616, 42.4284]], [[-71.1703, 42.4183], [-71.1701, 42.4182], [-71.1691, 42.4175]], [[-71.151, 42.4181], [-71.1506, 42.4183], [-71.1502, 42.4183], [-71.15, 42.4181], [-71.1498, 42.4176]], [[-71.1546, 42.4028], [-71.1549, 42.404], [-71.1547, 42.4046], [-71.1544, 42.4048], [-71.152, 42.4055]], [[-71.1498, 42.4134], [-71.1469, 42.4156], [-71.1461, 42.4158], [-71.1453, 42.4165], [-71.1453, 42.417], [-71.1436, 42.4191], [-71.1433, 42.4192]], [[-71.1876, 42.4241], [-71.1872, 42.4237]], [[-71.1712, 42.4101], [-71.1717, 42.4106], [-71.1725, 42.411]], [[-71.171, 42.4294], [-71.1722, 42.4303], [-71.1724, 42.4305]], [[-71.1769, 42.4109], [-71.1764, 42.4104]], [[-71.1994, 42.4164], [-71.1994, 42.4162], [-71.2011, 42.4158]], [[-71.1608, 42.4099], [-71.1613, 42.4093], [-71.1617, 42.409], [-71.1626, 42.4091], [-71.1629, 42.409], [-71.163, 42.4087]], [[-71.193, 42.4174], [-71.1925, 42.4164]], [[-71.1715, 42.419], [-71.1734, 42.4175]], [[-71.18, 42.4152], [-71.1796, 42.415], [-71.1795, 42.4146], [-71.1796, 42.4145], [-71.1801, 42.4143], [-71.1805, 42.4143], [-71.1807, 42.4145], [-71.1808, 42.4148], [-71.1806, 42.4151]], [[-71.1508, 42.406], [-71.1515, 42.4059]], [[-71.1486, 42.4197], [-71.1485, 42.4199]], [[-71.1373, 42.4018], [-71.1392, 42.4005], [-71.1407, 42.3999], [-71.1422, 42.3989]], [[-71.1643, 42.4301], [-71.1643, 42.4291]], [[-71.1526, 42.4032], [-71.1528, 42.4039]], [[-71.176, 42.4236], [-71.1777, 42.4232], [-71.1795, 42.4227], [-71.1816, 42.4229], [-71.1815, 42.4226], [-71.183, 42.4214], [-71.1867, 42.4202], [-71.1873, 42.4204], [-71.1879, 42.4204], [-71.1915, 42.4189], [-71.1921, 42.4189], [-71.1931, 42.4194], [-71.1934, 42.4195], [-71.1949, 42.4192], [-71.1964, 42.4192], [-71.1976, 42.4186], [-71.1984, 42.4177], [-71.1994, 42.417], [-71.1996, 42.4171]], [[-71.1892, 42.4176], [-71.1937, 42.416], [-71.1941, 42.4157]], [[-71.1354, 42.4075], [-71.1352, 42.4077]], [[-71.1414, 42.4116], [-71.1408, 42.4113]], [[-71.195, 42.4175], [-71.1958, 42.4177]], [[-71.1647, 42.4247], [-71.1633, 42.4264]], [[-71.1657, 42.4277], [-71.1679, 42.4288], [-71.17, 42.4299], [-71.1707, 42.4303]], [[-71.1806, 42.435], [-71.1811, 42.4354], [-71.1823, 42.4356], [-71.1825, 42.4358]], [[-71.1643, 42.4226], [-71.1637, 42.4232], [-71.1632, 42.4234], [-71.1628, 42.4234], [-71.1619, 42.4232], [-71.1616, 42.4233], [-71.1599, 42.425]], [[-71.1931, 42.4194], [-71.1927, 42.4202]], [[-71.1738, 42.4155], [-71.1738, 42.4157], [-71.1782, 42.4179]], [[-71.1382, 42.4132], [-71.1398, 42.4139]], [[-71.1445, 42.3998], [-71.1441, 42.3998], [-71.1437, 42.3997], [-71.1434, 42.3994], [-71.1425, 42.3991], [-71.1422, 42.3986], [-71.1406, 42.3998], [-71.1393, 42.4003], [-71.1377, 42.4005], [-71.1369, 42.4009], [-71.1362, 42.4015], [-71.135, 42.4031], [-71.1349, 42.4037], [-71.1347, 42.4044]], [[-71.1902, 42.4238], [-71.1877, 42.4228]], [[-71.1856, 42.427], [-71.186, 42.4268], [-71.186, 42.4267], [-71.1854, 42.4262], [-71.1855, 42.426]], [[-71.1521, 42.4163], [-71.1526, 42.4167], [-71.1533, 42.4168]], [[-71.1505, 42.4037], [-71.1503, 42.403]], [[-71.1481, 42.4202], [-71.1481, 42.4211]], [[-71.1544, 42.4276], [-71.1546, 42.4279]], [[-71.1897, 42.4236], [-71.189, 42.4247], [-71.1892, 42.425]], [[-71.1743, 42.428], [-71.1743, 42.4283]], [[-71.1743, 42.4283], [-71.1731, 42.4286], [-71.172, 42.4292]], [[-71.196, 42.4203], [-71.193, 42.4198]], [[-71.18, 42.4227], [-71.1796, 42.4242]], [[-71.1665, 42.4203], [-71.1663, 42.4209]], [[-71.1415, 42.4107], [-71.1501, 42.4143], [-71.1506, 42.4144], [-71.1508, 42.4144]], [[-71.1464, 42.405], [-71.1467, 42.4049], [-71.147, 42.4049], [-71.147, 42.4051], [-71.1466, 42.4052]], [[-71.1711, 42.4312], [-71.1724, 42.4307]], [[-71.1514, 42.4044], [-71.1523, 42.4061]], [[-71.1333, 42.4146], [-71.1351, 42.4148], [-71.1372, 42.4147], [-71.1385, 42.415], [-71.1396, 42.4155], [-71.1409, 42.4164], [-71.1423, 42.4183], [-71.1434, 42.4193], [-71.1436, 42.4199], [-71.1436, 42.4202], [-71.1434, 42.4205], [-71.1433, 42.4211], [-71.1436, 42.4216], [-71.1441, 42.4219], [-71.1448, 42.422], [-71.1465, 42.4217], [-71.148, 42.4221], [-71.1493, 42.4225], [-71.1498, 42.4225], [-71.1505, 42.4225], [-71.1513, 42.4221], [-71.1517, 42.4216], [-71.1518, 42.4212], [-71.1518, 42.4205], [-71.1522, 42.4198]], [[-71.1764, 42.4219], [-71.1755, 42.4218], [-71.1752, 42.422]], [[-71.1587, 42.4252], [-71.1584, 42.4247]], [[-71.1407, 42.3999], [-71.1428, 42.402], [-71.1443, 42.4051]], [[-71.1562, 42.4325], [-71.1567, 42.4324], [-71.1576, 42.4327], [-71.158, 42.4326], [-71.1582, 42.4323], [-71.1589, 42.4308], [-71.1593, 42.4298], [-71.1596, 42.4295], [-71.1604, 42.4293], [-71.1614, 42.4294], [-71.1621, 42.4292], [-71.1635, 42.4293], [-71.1646, 42.429], [-71.165, 42.4292]], [[-71.1608, 42.414], [-71.1614, 42.4142]], [[-71.1701, 42.4205], [-71.1685, 42.422], [-71.1648, 42.4228]], [[-71.1679, 42.4074], [-71.168, 42.4076]], [[-71.1552, 42.4171], [-71.1555, 42.4171]], [[-71.1534, 42.4296], [-71.156, 42.4316], [-71.1562, 42.4325], [-71.1557, 42.4332], [-71.1557, 42.4342], [-71.1555, 42.4346]], [[-71.1364, 42.4064], [-71.1354, 42.4059]], [[-71.1799, 42.4307], [-71.1793, 42.4312]], [[-71.1903, 42.4265], [-71.19, 42.4266]], [[-71.1575, 42.4258], [-71.1585, 42.4254], [-71.1587, 42.4252]], [[-71.1668, 42.4292], [-71.1669, 42.429], [-71.1669, 42.4288], [-71.1667, 42.4288], [-71.1665, 42.4291]], [[-71.1843, 42.4264], [-71.1848, 42.4253]], [[-71.1578, 42.4174], [-71.1602, 42.4179], [-71.1606, 42.4183], [-71.1608, 42.4186], [-71.1614, 42.4188], [-71.162, 42.4189], [-71.1624, 42.4186], [-71.1628, 42.4186], [-71.1631, 42.4186], [-71.1629, 42.4181], [-71.1632, 42.4177]], [[-71.1877, 42.4247], [-71.1877, 42.4249], [-71.1876, 42.425]], [[-71.1522, 42.415], [-71.1521, 42.4151]], [[-71.1569, 42.4163], [-71.1575, 42.4148], [-71.1597, 42.4126]], [[-71.1514, 42.4044], [-71.1511, 42.4044]], [[-71.1931, 42.4194], [-71.1936, 42.4188], [-71.1937, 42.4181]], [[-71.1816, 42.4243], [-71.1822, 42.423]], [[-71.1741, 42.425], [-71.1738, 42.4253]], [[-71.189, 42.4233], [-71.1882, 42.4244], [-71.1877, 42.4241], [-71.1869, 42.4242]], [[-71.1954, 42.4192], [-71.1954, 42.4196], [-71.1963, 42.421], [-71.1959, 42.4217]], [[-71.1475, 42.4042], [-71.1461, 42.4014], [-71.146, 42.4012], [-71.1454, 42.401], [-71.1453, 42.4009], [-71.1448, 42.3996], [-71.1445, 42.3993]], [[-71.1658, 42.4183], [-71.1628, 42.4218]], [[-71.1654, 42.4227], [-71.1654, 42.4223], [-71.1657, 42.4213]], [[-71.171, 42.4096], [-71.1696, 42.4093], [-71.169, 42.409], [-71.1684, 42.4085]], [[-71.1494, 42.4209], [-71.1495, 42.4213], [-71.1493, 42.4218], [-71.1491, 42.422]], [[-71.1459, 42.4086], [-71.1453, 42.4089], [-71.1425, 42.4111]], [[-71.197, 42.4164], [-71.1958, 42.4177], [-71.1954, 42.4192]], [[-71.1394, 42.4097], [-71.1354, 42.4142]], [[-71.1787, 42.4309], [-71.1803, 42.4318]], [[-71.1364, 42.4091], [-71.138, 42.4099]], [[-71.1733, 42.4097], [-71.1725, 42.411]], [[-71.1551, 42.414], [-71.1574, 42.415]], [[-71.1476, 42.4074], [-71.1481, 42.4078]], [[-71.1656, 42.4279], [-71.165, 42.4278], [-71.1646, 42.4278], [-71.164, 42.428], [-71.1637, 42.4285], [-71.1634, 42.429], [-71.1633, 42.4301]], [[-71.1773, 42.4106], [-71.1764, 42.4112], [-71.1751, 42.4123]], [[-71.1756, 42.4193], [-71.176, 42.4197]], [[-71.165, 42.4314], [-71.1649, 42.4311]], [[-71.1593, 42.4298], [-71.1587, 42.4291], [-71.1586, 42.4289], [-71.1588, 42.4285], [-71.1595, 42.4283]], [[-71.1502, 42.4209], [-71.1502, 42.4213], [-71.1496, 42.4222], [-71.1495, 42.4222], [-71.1489, 42.4221]], [[-71.1788, 42.4242], [-71.1788, 42.4236], [-71.1784, 42.423]], [[-71.1471, 42.4095], [-71.1445, 42.4117], [-71.1443, 42.4119]], [[-71.1703, 42.4357], [-71.1703, 42.4353], [-71.1708, 42.4351]], [[-71.1747, 42.4296], [-71.1732, 42.4298]], [[-71.1957, 42.4158], [-71.194, 42.4154], [-71.1918, 42.4148]], [[-71.1551, 42.4149], [-71.1549, 42.4151], [-71.1546, 42.4159]], [[-71.1742, 42.4276], [-71.1749, 42.4275], [-71.1755, 42.4271]], [[-71.1896, 42.4254], [-71.1895, 42.4262], [-71.1904, 42.427]], [[-71.1349, 42.4065], [-71.1344, 42.4071], [-71.1354, 42.4075]], [[-71.1487, 42.4094], [-71.1493, 42.4094]], [[-71.149, 42.4186], [-71.149, 42.4187]], [[-71.1957, 42.4154], [-71.1956, 42.415], [-71.1948, 42.4136]], [[-71.153, 42.4258], [-71.1536, 42.426], [-71.1539, 42.4262], [-71.1542, 42.4272]], [[-71.145, 42.4049], [-71.1461, 42.4058], [-71.1471, 42.4068]], [[-71.1757, 42.4329], [-71.1764, 42.4331], [-71.1766, 42.4333], [-71.1764, 42.434], [-71.1757, 42.4346]], [[-71.1695, 42.4243], [-71.1696, 42.4253]], [[-71.1685, 42.4197], [-71.1722, 42.4169]], [[-71.1491, 42.4126], [-71.1502, 42.4121], [-71.1504, 42.4116], [-71.1507, 42.4114], [-71.1513, 42.4119], [-71.1521, 42.4118], [-71.1523, 42.412], [-71.1534, 42.4115]], [[-71.1957, 42.4154], [-71.1992, 42.4164]], [[-71.1883, 42.423], [-71.1893, 42.4217]], [[-71.1539, 42.4215], [-71.1526, 42.4214]], [[-71.1555, 42.4051], [-71.1516, 42.4063]], [[-71.1733, 42.4224], [-71.1745, 42.4215]], [[-71.1735, 42.4196], [-71.1746, 42.4204]], [[-71.1654, 42.4227], [-71.1654, 42.423]], [[-71.1538, 42.4212], [-71.1541, 42.421], [-71.155, 42.4212], [-71.1564, 42.4223], [-71.1568, 42.4224], [-71.1571, 42.4224], [-71.1575, 42.4222], [-71.1592, 42.4203], [-71.1591, 42.42], [-71.1589, 42.4198], [-71.1589, 42.4194]], [[-71.1557, 42.4135], [-71.1539, 42.4118], [-71.1534, 42.4115]], [[-71.1481, 42.4195], [-71.1475, 42.419]], [[-71.1498, 42.4201], [-71.15, 42.4204]], [[-71.1463, 42.3988], [-71.1439, 42.3981], [-71.1436, 42.3975]], [[-71.1584, 42.4323], [-71.1592, 42.4321], [-71.1602, 42.432], [-71.1619, 42.4314], [-71.1627, 42.4308], [-71.165, 42.4301], [-71.1655, 42.4297], [-71.1657, 42.4294]], [[-71.1644, 42.4229], [-71.1637, 42.4236], [-71.163, 42.4247], [-71.1617, 42.4261]], [[-71.1369, 42.4075], [-71.136, 42.407]], [[-71.136, 42.4069], [-71.136, 42.407]], [[-71.1464, 42.3987], [-71.1463, 42.3988], [-71.1476, 42.3994]], [[-71.1634, 42.4079], [-71.1632, 42.4077], [-71.1633, 42.4076], [-71.1634, 42.4079]], [[-71.1354, 42.4059], [-71.1351, 42.4058]], [[-71.1756, 42.4337], [-71.1753, 42.4337]], [[-71.1539, 42.4149], [-71.1531, 42.4143]], [[-71.1524, 42.4277], [-71.1517, 42.4279]], [[-71.1871, 42.4197], [-71.1867, 42.4202]], [[-71.1393, 42.4144], [-71.1411, 42.4153]], [[-71.1369, 42.4105], [-71.136, 42.4114]], [[-71.1469, 42.4176], [-71.1475, 42.4179], [-71.1468, 42.419]], [[-71.1486, 42.4041], [-71.1492, 42.4057]], [[-71.1682, 42.4075], [-71.168, 42.4076]], [[-71.1747, 42.4353], [-71.1728, 42.4337], [-71.1727, 42.4329], [-71.1729, 42.4326], [-71.1731, 42.4325]], [[-71.1685, 42.4171], [-71.1716, 42.4145], [-71.1733, 42.413], [-71.1745, 42.412]], [[-71.1624, 42.405], [-71.1619, 42.4049], [-71.1601, 42.4046]], [[-71.169, 42.4147], [-71.1675, 42.4137], [-71.1668, 42.4134]], [[-71.1541, 42.4178], [-71.1539, 42.4182]], [[-71.1751, 42.4243], [-71.1759, 42.4242], [-71.1775, 42.4249]], [[-71.1549, 42.416], [-71.1542, 42.4159], [-71.153, 42.4155]], [[-71.1756, 42.4253], [-71.1741, 42.425]], [[-71.1727, 42.4219], [-71.1707, 42.4234]], [[-71.1373, 42.4145], [-71.1372, 42.4147]], [[-71.1857, 42.4257], [-71.1861, 42.4256], [-71.1868, 42.4261], [-71.1864, 42.4269], [-71.186, 42.4268]], [[-71.1482, 42.4166], [-71.1495, 42.4175], [-71.1494, 42.4181]], [[-71.1335, 42.4086], [-71.1333, 42.4085], [-71.1331, 42.4086], [-71.1327, 42.4097], [-71.1327, 42.4104], [-71.1333, 42.4118], [-71.1332, 42.4127]], [[-71.1635, 42.4173], [-71.1632, 42.4177]], [[-71.1444, 42.4075], [-71.1408, 42.4103], [-71.1377, 42.4138], [-71.1375, 42.4141]], [[-71.1873, 42.4221], [-71.1863, 42.4193], [-71.1856, 42.4181], [-71.1821, 42.4137]], [[-71.1715, 42.4127], [-71.17, 42.412], [-71.1694, 42.4118]], [[-71.1588, 42.4151], [-71.1595, 42.4154]], [[-71.1918, 42.4227], [-71.1909, 42.4224], [-71.1905, 42.4222]], [[-71.1601, 42.4094], [-71.1614, 42.4084], [-71.1621, 42.4082], [-71.1624, 42.4082], [-71.1629, 42.4084], [-71.1632, 42.4092], [-71.163, 42.4097], [-71.1637, 42.4103]], [[-71.2004, 42.4166], [-71.1992, 42.4164]], [[-71.1361, 42.4081], [-71.1347, 42.4094], [-71.1343, 42.4105]], [[-71.1913, 42.4249], [-71.1918, 42.425]], [[-71.1508, 42.4164], [-71.1511, 42.4167], [-71.151, 42.4169]], [[-71.1411, 42.4164], [-71.1408, 42.4164]], [[-71.1757, 42.4255], [-71.176, 42.4256]], [[-71.1704, 42.4261], [-71.1684, 42.4261], [-71.1668, 42.4258], [-71.1663, 42.4256]], [[-71.164, 42.4204], [-71.1669, 42.421], [-71.169, 42.4216]], [[-71.1743, 42.4283], [-71.1748, 42.43], [-71.1752, 42.4306], [-71.176, 42.4316], [-71.1761, 42.4321], [-71.1757, 42.433], [-71.1754, 42.4345], [-71.1747, 42.4353], [-71.1739, 42.436]], [[-71.1485, 42.4213], [-71.1481, 42.4211]], [[-71.1377, 42.4021], [-71.1351, 42.4043]], [[-71.1455, 42.4108], [-71.1467, 42.4116]], [[-71.1646, 42.4347], [-71.1634, 42.4344], [-71.1631, 42.4339], [-71.1627, 42.4336], [-71.1602, 42.432]], [[-71.1657, 42.4242], [-71.1662, 42.4239], [-71.1672, 42.4245]], [[-71.176, 42.4256], [-71.1769, 42.4258], [-71.1777, 42.4257], [-71.1779, 42.4256], [-71.1781, 42.4252]], [[-71.1862, 42.4304], [-71.1828, 42.4316]], [[-71.1638, 42.4139], [-71.1665, 42.4141]], [[-71.1495, 42.4094], [-71.1494, 42.4093], [-71.1493, 42.4094]], [[-71.1663, 42.4185], [-71.1678, 42.4174]], [[-71.1898, 42.4213], [-71.19, 42.4216], [-71.1912, 42.4222]], [[-71.1466, 42.4025], [-71.1512, 42.4016]], [[-71.1712, 42.4101], [-71.1713, 42.4108], [-71.1724, 42.4111], [-71.1725, 42.411]], [[-71.1818, 42.4119], [-71.1797, 42.4134], [-71.1789, 42.4141]], [[-71.1677, 42.4258], [-71.1675, 42.426]], [[-71.1581, 42.4209], [-71.1584, 42.4203], [-71.1592, 42.4203]], [[-71.1582, 42.4274], [-71.1585, 42.4276], [-71.159, 42.4277], [-71.1594, 42.428], [-71.1598, 42.4294], [-71.1606, 42.4301], [-71.1615, 42.4315]], [[-71.1549, 42.4141], [-71.1537, 42.413]], [[-71.1663, 42.4289], [-71.1657, 42.4294]], [[-71.1601, 42.4309], [-71.1618, 42.4304]], [[-71.1425, 42.4111], [-71.1384, 42.4155]], [[-71.1605, 42.4222], [-71.1605, 42.4219], [-71.1602, 42.4218], [-71.159, 42.4218], [-71.1583, 42.4225]], [[-71.1475, 42.4042], [-71.1477, 42.4046], [-71.1482, 42.4059]], [[-71.1447, 42.4103], [-71.1415, 42.408]], [[-71.1351, 42.4043], [-71.1358, 42.4048]], [[-71.1623, 42.432], [-71.163, 42.4329], [-71.1632, 42.4332], [-71.163, 42.4334], [-71.1627, 42.4336]], [[-71.1792, 42.4303], [-71.1788, 42.4307], [-71.1783, 42.4317], [-71.1775, 42.4325], [-71.1774, 42.433], [-71.1774, 42.4342], [-71.1766, 42.4349]], [[-71.1812, 42.4205], [-71.1783, 42.4202]], [[-71.1373, 42.4108], [-71.137, 42.4111]], [[-71.1622, 42.4215], [-71.1616, 42.4218], [-71.1605, 42.4222], [-71.1583, 42.4227], [-71.1574, 42.4236]], [[-71.1801, 42.4264], [-71.1809, 42.4272]], [[-71.1474, 42.4065], [-71.1453, 42.4081]], [[-71.1646, 42.41], [-71.1643, 42.41], [-71.164, 42.4099]], [[-71.1361, 42.4094], [-71.1356, 42.4091]], [[-71.1485, 42.4199], [-71.1485, 42.4202]], [[-71.1904, 42.4194], [-71.1893, 42.4179], [-71.1888, 42.4168], [-71.185, 42.4122]], [[-71.1835, 42.4263], [-71.1839, 42.4253]], [[-71.1811, 42.4279], [-71.1784, 42.43]], [[-71.1678, 42.4166], [-71.1734, 42.4121], [-71.1738, 42.4117], [-71.1749, 42.4101]], [[-71.1728, 42.4201], [-71.1742, 42.4212]], [[-71.1729, 42.4339], [-71.1734, 42.4336]], [[-71.1774, 42.4196], [-71.1778, 42.4192]], [[-71.1781, 42.4302], [-71.1775, 42.4309]], [[-71.1539, 42.4215], [-71.1543, 42.4222]], [[-71.1683, 42.4142], [-71.1692, 42.4135], [-71.1701, 42.4129], [-71.1706, 42.4123]], [[-71.1592, 42.409], [-71.1578, 42.4079]], [[-71.1596, 42.4046], [-71.1575, 42.4036], [-71.156, 42.403], [-71.1549, 42.4023]], [[-71.1731, 42.4286], [-71.1724, 42.4282], [-71.1718, 42.4274]], [[-71.1706, 42.4208], [-71.1743, 42.418]], [[-71.1908, 42.4176], [-71.1895, 42.4181]], [[-71.1439, 42.4218], [-71.1458, 42.4212], [-71.1463, 42.4212]], [[-71.1639, 42.4062], [-71.1639, 42.4063], [-71.1658, 42.4074], [-71.1667, 42.4075]], [[-71.1711, 42.4177], [-71.1717, 42.4181], [-71.1729, 42.4173]], [[-71.1533, 42.4294], [-71.1539, 42.4289], [-71.1543, 42.429], [-71.1545, 42.4295], [-71.1548, 42.4297], [-71.1555, 42.4297], [-71.156, 42.4296], [-71.1562, 42.4296]], [[-71.1696, 42.421], [-71.1708, 42.4217]], [[-71.1691, 42.4233], [-71.1697, 42.4233]], [[-71.1464, 42.405], [-71.1467, 42.4049], [-71.147, 42.4049], [-71.147, 42.4051], [-71.1466, 42.4052], [-71.1456, 42.4062], [-71.144, 42.4071]], [[-71.1806, 42.431], [-71.18, 42.4316]], [[-71.1925, 42.4244], [-71.1927, 42.4238]], [[-71.149, 42.4187], [-71.1487, 42.4188], [-71.1484, 42.419], [-71.1481, 42.4195]], [[-71.1378, 42.4115], [-71.1378, 42.4118], [-71.1374, 42.4119], [-71.1386, 42.4125]], [[-71.1773, 42.4262], [-71.1771, 42.4271], [-71.1754, 42.429]], [[-71.1493, 42.4094], [-71.1494, 42.4094], [-71.1495, 42.4094]], [[-71.158, 42.4296], [-71.1592, 42.4301], [-71.1597, 42.4304], [-71.1607, 42.4318]], [[-71.1741, 42.4349], [-71.1746, 42.4342], [-71.1741, 42.4339], [-71.1735, 42.4343]], [[-71.1907, 42.422], [-71.1905, 42.4222]], [[-71.1402, 42.4134], [-71.142, 42.4143]], [[-71.1534, 42.4234], [-71.1512, 42.4223]], [[-71.1355, 42.41], [-71.1335, 42.4086]], [[-71.1638, 42.4223], [-71.1642, 42.422]], [[-71.1411, 42.4049], [-71.1367, 42.4083]], [[-71.1691, 42.4238], [-71.1689, 42.424]], [[-71.1703, 42.4183], [-71.1705, 42.4184], [-71.1715, 42.419]], [[-71.1563, 42.4292], [-71.1561, 42.4294], [-71.1559, 42.4294]], [[-71.1444, 42.4204], [-71.1454, 42.4218]], [[-71.1427, 42.4058], [-71.1384, 42.4092]], [[-71.1476, 42.4198], [-71.1477, 42.4201]], [[-71.1485, 42.4202], [-71.1487, 42.4206]], [[-71.1549, 42.4283], [-71.1552, 42.4289], [-71.1559, 42.4294], [-71.1558, 42.4296]], [[-71.1638, 42.4139], [-71.1665, 42.4141]], [[-71.1704, 42.4261], [-71.1708, 42.4257], [-71.1707, 42.4257], [-71.1699, 42.4254], [-71.1687, 42.4253], [-71.1672, 42.4247]], [[-71.1494, 42.4162], [-71.1497, 42.4159], [-71.1489, 42.4162]], [[-71.1774, 42.424], [-71.178, 42.4243], [-71.1818, 42.4261], [-71.1843, 42.4263], [-71.185, 42.4266], [-71.1856, 42.427], [-71.186, 42.4275], [-71.1868, 42.4297]], [[-71.1512, 42.4134], [-71.1515, 42.4137]], [[-71.1504, 42.4139], [-71.1512, 42.4134]], [[-71.1547, 42.4192], [-71.1541, 42.421]], [[-71.1574, 42.4185], [-71.1599, 42.4194], [-71.1626, 42.4205], [-71.1635, 42.421], [-71.1657, 42.4213], [-71.1686, 42.422], [-71.1707, 42.4234], [-71.1738, 42.4253], [-71.1757, 42.4259], [-71.1763, 42.426], [-71.1807, 42.4255], [-71.1848, 42.4253], [-71.1863, 42.4253], [-71.1916, 42.4261]], [[-71.1818, 42.4261], [-71.1813, 42.4269], [-71.1775, 42.4297], [-71.1768, 42.4305], [-71.176, 42.4316]], [[-71.1902, 42.4238], [-71.1907, 42.4235], [-71.1915, 42.4226]], [[-71.1361, 42.4045], [-71.1367, 42.4049]], [[-71.1534, 42.4166], [-71.153, 42.4179]], [[-71.1691, 42.4175], [-71.1662, 42.4156], [-71.1654, 42.4156], [-71.1649, 42.4155], [-71.1646, 42.4153], [-71.1638, 42.414]], [[-71.165, 42.4179], [-71.1727, 42.4117], [-71.1731, 42.4113], [-71.1743, 42.4096]], [[-71.1379, 42.4023], [-71.1405, 42.4006], [-71.1427, 42.3993]], [[-71.1586, 42.4165], [-71.1585, 42.4169]], [[-71.1767, 42.4192], [-71.1789, 42.4173]], [[-71.1636, 42.4127], [-71.1639, 42.4123], [-71.1647, 42.4116]], [[-71.1742, 42.4153], [-71.1755, 42.4142]], [[-71.1814, 42.4361], [-71.181, 42.436]], [[-71.1431, 42.4156], [-71.1453, 42.417]], [[-71.1668, 42.4134], [-71.1671, 42.4131]], [[-71.1983, 42.4178], [-71.1992, 42.4184]], [[-71.1718, 42.4226], [-71.1722, 42.4229], [-71.1727, 42.4231], [-71.1735, 42.4225]], [[-71.1477, 42.4169], [-71.1492, 42.4181]], [[-71.1502, 42.4198], [-71.1499, 42.42]], [[-71.1729, 42.4173], [-71.1731, 42.4172], [-71.1742, 42.4164], [-71.176, 42.4149], [-71.1762, 42.4146]], [[-71.1463, 42.4182], [-71.1449, 42.4175]], [[-71.157, 42.4126], [-71.1554, 42.4112]], [[-71.1731, 42.435], [-71.1721, 42.4355], [-71.1719, 42.4358]], [[-71.1435, 42.3978], [-71.1438, 42.3981], [-71.1443, 42.3992], [-71.1445, 42.3993]], [[-71.1646, 42.435], [-71.1642, 42.4335], [-71.1643, 42.4327], [-71.1642, 42.4324], [-71.1634, 42.4321], [-71.1632, 42.4317]], [[-71.1408, 42.4046], [-71.1433, 42.4029], [-71.1452, 42.4022]], [[-71.1614, 42.4142], [-71.163, 42.4149]], [[-71.1461, 42.4014], [-71.1472, 42.4012]], [[-71.1537, 42.4303], [-71.1518, 42.4308], [-71.1505, 42.4301]], [[-71.1597, 42.4167], [-71.1618, 42.4137], [-71.1627, 42.4121], [-71.1636, 42.4114]], [[-71.1443, 42.3991], [-71.1445, 42.3993]], [[-71.1479, 42.4133], [-71.1463, 42.4146], [-71.1459, 42.4148], [-71.1449, 42.4159], [-71.1425, 42.4185]], [[-71.1358, 42.4137], [-71.1352, 42.4134]], [[-71.1602, 42.4269], [-71.161, 42.4268]], [[-71.157, 42.4269], [-71.1575, 42.4277], [-71.1574, 42.4279], [-71.1577, 42.429], [-71.1581, 42.4299], [-71.1579, 42.4308]], [[-71.1539, 42.4289], [-71.1541, 42.4286], [-71.156, 42.428]], [[-71.1523, 42.4298], [-71.1512, 42.4306]], [[-71.1572, 42.4237], [-71.1574, 42.4236], [-71.1571, 42.4236]], [[-71.1861, 42.4279], [-71.1856, 42.4281]], [[-71.1408, 42.4113], [-71.1405, 42.4115], [-71.1399, 42.4113]], [[-71.1556, 42.4268], [-71.1553, 42.4268], [-71.1551, 42.4265], [-71.1549, 42.4266], [-71.1549, 42.4268]], [[-71.1498, 42.4239], [-71.15, 42.4233], [-71.15, 42.4229]], [[-71.1652, 42.4262], [-71.1646, 42.4267]], [[-71.1902, 42.414], [-71.1864, 42.4124]], [[-71.1508, 42.4151], [-71.1522, 42.4162]], [[-71.1891, 42.4208], [-71.1888, 42.4209]], [[-71.1762, 42.4362], [-71.1772, 42.4353]], [[-71.1396, 42.4116], [-71.1412, 42.4124]], [[-71.1635, 42.4252], [-71.1628, 42.4261]], [[-71.1598, 42.4038], [-71.16, 42.404], [-71.1604, 42.4041]], [[-71.1528, 42.4284], [-71.1535, 42.4282], [-71.1543, 42.4277], [-71.1569, 42.4269], [-71.1585, 42.4263], [-71.1599, 42.426], [-71.1605, 42.4258]], [[-71.1853, 42.4227], [-71.1858, 42.4232], [-71.1863, 42.4233], [-71.1869, 42.4231], [-71.1877, 42.4228], [-71.1883, 42.4217]], [[-71.1474, 42.4212], [-71.1474, 42.4216], [-71.1482, 42.4218]], [[-71.1485, 42.4213], [-71.1489, 42.4216], [-71.1491, 42.422]], [[-71.1861, 42.4225], [-71.1851, 42.4197], [-71.1848, 42.4191], [-71.183, 42.4168]], [[-71.1915, 42.4196], [-71.1933, 42.4205], [-71.1951, 42.4209]], [[-71.1683, 42.4354], [-71.1705, 42.4346]], [[-71.175, 42.4241], [-71.1741, 42.425]], [[-71.1363, 42.4116], [-71.1359, 42.4121]], [[-71.1477, 42.4201], [-71.1475, 42.4203], [-71.147, 42.4207], [-71.1471, 42.4209], [-71.1475, 42.4209]], [[-71.1643, 42.4226], [-71.1646, 42.4235], [-71.1647, 42.4245], [-71.1651, 42.4254], [-71.1653, 42.4263], [-71.1662, 42.427], [-71.1667, 42.4272], [-71.1679, 42.4278]], [[-71.1999, 42.4177], [-71.1992, 42.4172]], [[-71.1334, 42.4139], [-71.1334, 42.4137]], [[-71.1388, 42.403], [-71.1383, 42.4034], [-71.1382, 42.4037], [-71.138, 42.4039]], [[-71.1567, 42.4163], [-71.1561, 42.4177]], [[-71.1713, 42.4291], [-71.1706, 42.4298]], [[-71.1435, 42.4214], [-71.1454, 42.4206], [-71.1456, 42.42], [-71.145, 42.4197]], [[-71.1407, 42.4129], [-71.1425, 42.4138]], [[-71.1654, 42.4298], [-71.1655, 42.43], [-71.1669, 42.4307], [-71.1668, 42.4309], [-71.1662, 42.4311]], [[-71.1545, 42.4124], [-71.1524, 42.414]], [[-71.1525, 42.4166], [-71.1518, 42.4177], [-71.1518, 42.418]], [[-71.1513, 42.4147], [-71.1497, 42.4159]], [[-71.1781, 42.4252], [-71.1783, 42.4245]], [[-71.1532, 42.4156], [-71.153, 42.4155]], [[-71.151, 42.4181], [-71.1512, 42.418], [-71.1541, 42.4178]], [[-71.1445, 42.3997], [-71.1449, 42.4007], [-71.1454, 42.4014], [-71.1458, 42.4025], [-71.1482, 42.4071], [-71.1487, 42.4094], [-71.1508, 42.4117], [-71.1515, 42.4128], [-71.1524, 42.4148], [-71.1533, 42.4154], [-71.1534, 42.4166], [-71.1542, 42.4174]], [[-71.1864, 42.4178], [-71.1821, 42.4125]], [[-71.1635, 42.4173], [-71.1638, 42.4168], [-71.1646, 42.4165], [-71.1655, 42.416], [-71.1672, 42.4145]], [[-71.1599, 42.4218], [-71.1599, 42.4214], [-71.1596, 42.4211], [-71.1594, 42.421]], [[-71.1528, 42.4203], [-71.1524, 42.422]], [[-71.1788, 42.4328], [-71.1782, 42.4328]], [[-71.1556, 42.4161], [-71.1552, 42.4171]], [[-71.1669, 42.421], [-71.1672, 42.4205]], [[-71.1867, 42.4202], [-71.1906, 42.4186], [-71.1918, 42.4168]], [[-71.1494, 42.4181], [-71.1492, 42.4191], [-71.1495, 42.4197], [-71.1498, 42.4201]], [[-71.149, 42.4186], [-71.1486, 42.4184], [-71.1481, 42.418]], [[-71.1665, 42.4151], [-71.1652, 42.4147], [-71.1652, 42.4146], [-71.1653, 42.414]], [[-71.1669, 42.421], [-71.1672, 42.4205]], [[-71.1373, 42.412], [-71.1363, 42.4116], [-71.1332, 42.41]], [[-71.1746, 42.4195], [-71.1754, 42.4203]], [[-71.1502, 42.4137], [-71.1501, 42.4138]], [[-71.1568, 42.4127], [-71.1578, 42.4134]], [[-71.1384, 42.4027], [-71.1355, 42.405]], [[-71.1359, 42.4121], [-71.1355, 42.412], [-71.1353, 42.4123], [-71.1353, 42.4124], [-71.1358, 42.4126], [-71.1361, 42.4123], [-71.1361, 42.4121], [-71.1359, 42.4121]], [[-71.1887, 42.4225], [-71.1909, 42.4233]], [[-71.1675, 42.4137], [-71.1683, 42.4131], [-71.1693, 42.4129]], [[-71.1532, 42.4314], [-71.1527, 42.4305]], [[-71.1491, 42.4033], [-71.1485, 42.4021]], [[-71.1544, 42.4275], [-71.1544, 42.4276]], [[-71.1846, 42.4257], [-71.1854, 42.4258]], [[-71.1774, 42.4341], [-71.1768, 42.4337], [-71.1765, 42.4337]], [[-71.195, 42.4211], [-71.1954, 42.4207], [-71.1979, 42.4192], [-71.1995, 42.4177]], [[-71.136, 42.4036], [-71.1351, 42.403]], [[-71.1492, 42.4181], [-71.149, 42.4186]], [[-71.1332, 42.4139], [-71.1371, 42.4144], [-71.138, 42.4147], [-71.1383, 42.4149]], [[-71.1806, 42.4151], [-71.1803, 42.4157]], [[-71.1501, 42.4143], [-71.1496, 42.4147], [-71.1491, 42.4148], [-71.1478, 42.4158]], [[-71.1994, 42.417], [-71.1947, 42.4159], [-71.1928, 42.4152], [-71.1918, 42.4148]], [[-71.1445, 42.4131], [-71.1411, 42.4164]], [[-71.1903, 42.4265], [-71.1904, 42.4266], [-71.1902, 42.4267]], [[-71.1573, 42.424], [-71.1572, 42.4237]]]}, "labels": [{"name": "Massachusetts Ave", "at": [-71.174, 42.4195], "angle": 24}, {"name": "Pleasant St", "at": [-71.188, 42.3998], "angle": 3}, {"name": "Summer St", "at": [-71.169, 42.429], "angle": -4}, {"name": "Park Ave", "at": [-71.1803, 42.4173], "angle": 84}, {"name": "Mystic St", "at": [-71.151, 42.4205], "angle": -52}, {"name": "Broadway", "at": [-71.1478, 42.416], "angle": 84}, {"name": "Lake St", "at": [-71.158, 42.4026], "angle": 30}, {"name": "Forest St", "at": [-71.1765, 42.419], "angle": 80}, {"name": "Ridge St", "at": [-71.161, 42.424], "angle": 84}, {"name": "Highland Ave", "at": [-71.1935, 42.4115], "angle": 78}, {"name": "Lowell St", "at": [-71.1975, 42.4285], "angle": 48}, {"name": "Oakland Ave", "at": [-71.155, 42.42], "angle": 84}, {"name": "Medford St", "at": [-71.1468, 42.4185], "angle": -35}, {"name": "Mystic Valley Pkwy", "at": [-71.1385, 42.424], "angle": 70}, {"name": "Route 2", "at": [-71.1834, 42.4114], "angle": 21}], "water": [[[-71.1622, 42.4061], [-71.1622, 42.4061], [-71.1622, 42.406], [-71.1619, 42.4059], [-71.1602, 42.4052], [-71.1569, 42.4036], [-71.1568, 42.4036], [-71.1567, 42.4037], [-71.1563, 42.404], [-71.1563, 42.404], [-71.1563, 42.4056], [-71.1563, 42.4057], [-71.1564, 42.4057], [-71.1564, 42.4058], [-71.1564, 42.406], [-71.1563, 42.4061], [-71.1561, 42.4062], [-71.1559, 42.4063], [-71.1557, 42.4063], [-71.1555, 42.4064], [-71.1553, 42.4064], [-71.1551, 42.4066], [-71.155, 42.4068], [-71.1547, 42.4071], [-71.1547, 42.4072], [-71.1547, 42.4073], [-71.1547, 42.4076], [-71.1547, 42.4077], [-71.1545, 42.4078], [-71.1544, 42.4079], [-71.1543, 42.4079], [-71.1539, 42.4079], [-71.1536, 42.4078], [-71.1535, 42.4078], [-71.1533, 42.4078], [-71.1532, 42.4077], [-71.1531, 42.4076], [-71.153, 42.4075], [-71.153, 42.4074], [-71.1529, 42.4073], [-71.1527, 42.4071], [-71.1525, 42.407], [-71.1523, 42.407], [-71.1522, 42.407], [-71.1521, 42.407], [-71.1518, 42.4072], [-71.1517, 42.4073], [-71.1516, 42.4073], [-71.1513, 42.4074], [-71.1513, 42.4074], [-71.151, 42.4073], [-71.1507, 42.4072], [-71.1505, 42.4071], [-71.1504, 42.407], [-71.1504, 42.4067], [-71.1502, 42.4064], [-71.1501, 42.4063], [-71.1499, 42.4061], [-71.1497, 42.4061], [-71.1495, 42.406], [-71.1492, 42.406], [-71.1488, 42.406], [-71.1487, 42.406], [-71.1486, 42.4061], [-71.1485, 42.4061], [-71.1485, 42.4062], [-71.1486, 42.4064], [-71.1488, 42.4066], [-71.149, 42.407], [-71.149, 42.4072], [-71.149, 42.4074], [-71.149, 42.4075], [-71.1492, 42.4077], [-71.1494, 42.4081], [-71.1495, 42.4082], [-71.1497, 42.4085], [-71.1499, 42.4088], [-71.1499, 42.409], [-71.1498, 42.4092], [-71.1497, 42.4094], [-71.1496, 42.4095], [-71.1495, 42.4098], [-71.1495, 42.4099], [-71.1496, 42.4101], [-71.1497, 42.4102], [-71.1498, 42.4104], [-71.1502, 42.4106], [-71.1505, 42.4108], [-71.1511, 42.4111], [-71.1512, 42.4112], [-71.1514, 42.4115], [-71.1515, 42.4115], [-71.1516, 42.4115], [-71.1518, 42.4115], [-71.1523, 42.4114], [-71.1526, 42.4113], [-71.1531, 42.4113], [-71.1532, 42.4113], [-71.1533, 42.4113], [-71.1535, 42.4113], [-71.1538, 42.4113], [-71.1539, 42.4113], [-71.1541, 42.4113], [-71.1543, 42.4112], [-71.1543, 42.4112], [-71.1545, 42.411], [-71.1547, 42.4109], [-71.1549, 42.4109], [-71.1551, 42.4109], [-71.1552, 42.4108], [-71.1557, 42.4108], [-71.1561, 42.4107], [-71.1563, 42.4105], [-71.1563, 42.4104], [-71.1564, 42.4104], [-71.1565, 42.4103], [-71.1566, 42.4101], [-71.1567, 42.4098], [-71.1567, 42.4096], [-71.1567, 42.4095], [-71.1565, 42.4093], [-71.1566, 42.4091], [-71.1567, 42.4089], [-71.157, 42.4087], [-71.1571, 42.4084], [-71.1573, 42.4081], [-71.1576, 42.4079], [-71.1578, 42.4078], [-71.1579, 42.4078], [-71.1581, 42.4077], [-71.1587, 42.4075], [-71.159, 42.4074], [-71.1598, 42.4071], [-71.1604, 42.407], [-71.1609, 42.407], [-71.1611, 42.4069], [-71.1613, 42.4067], [-71.1615, 42.4066], [-71.1616, 42.4065], [-71.1621, 42.4062], [-71.1622, 42.4061]]]};
+var POP2020 = [];
 
 var state = { raceIdx: 12, mode: "yesshare", candIdx: 0 };
 var precinctPaths = [];
@@ -2501,7 +2816,7 @@ function updateLegend(){
   }
 }
 
-/* ---------- self-contained SVG map ---------- */
+/* ---------- self-contained SVG map with the real street network ---------- */
 var SVGNS = "http://www.w3.org/2000/svg";
 function el(tag, attrs){
   var n = document.createElementNS(SVGNS, tag);
@@ -2549,28 +2864,37 @@ function buildMap(){
   function linePoints(pts){
     return pts.map(function(pt){ return X(pt[0]).toFixed(1) + "," + Y(pt[1]).toFixed(1); }).join(" ");
   }
+  function drawStreets(list, cls, width){
+    list.forEach(function(pts){
+      if (pts.length < 2) return;
+      svg.appendChild(el("polyline", { points: linePoints(pts), "class": cls, "stroke-width": width }));
+    });
+  }
 
   var svg = el("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "xMidYMid meet", role: "img", "aria-label": "Arlington precincts map" });
   svg.appendChild(el("rect", { x: 0, y: 0, width: W, height: H, fill: "var(--map-bg)" }));
 
-  /* Spy Pond under the fills */
-  var pond = el("polygon", { points: linePoints(SPY_POND), "class": "water-body" });
-  svg.appendChild(pond);
-
-  /* streets: casing then surface */
-  STREETS.forEach(function(s){
-    svg.appendChild(el("polyline", { points: linePoints(s.pts), "class": "street-casing", "stroke-width": 7 }));
-  });
-  STREETS.forEach(function(s){
-    svg.appendChild(el("polyline", { points: linePoints(s.pts), "class": "street-line", "stroke-width": 4.5 }));
+  /* real Spy Pond shoreline, under everything */
+  MAPDATA.water.forEach(function(ring){
+    svg.appendChild(el("polygon", { points: linePoints(ring), "class": "water-body" }));
   });
 
-  /* precinct fills */
+  /* real streets, smallest first: local streets as a fine underlay,
+     then secondary roads, then primary routes with casing + surface */
+  drawStreets(MAPDATA.streets.local, "street-local", 1.5);
+  drawStreets(MAPDATA.streets.secondary, "street-casing", 5.5);
+  drawStreets(MAPDATA.streets.secondary, "street-line", 3.2);
+  drawStreets(MAPDATA.streets.primary, "street-casing", 8);
+  drawStreets(MAPDATA.streets.primary, "street-line", 5);
+
+  /* precinct fills over the street network */
   precinctPaths = [];
+  POP2020 = [];
   var labelData = [];
   GEO.features.forEach(function(f){
     var pNum = parseInt(f.properties.PRECINCT, 10);
     var pIdx = pNum - 1;
+    POP2020[pIdx] = f.properties.POP_2020;
     var path = el("path", {
       d: geomPath(f.geometry), "class": "precinct-path",
       tabindex: "0", role: "button",
@@ -2589,16 +2913,16 @@ function buildMap(){
     labelData.push({ n: pNum, c: centroid(f.geometry) });
   });
 
-  /* road labels over the fills, kept small and plain */
-  STREETS.forEach(function(s){
+  /* major-road labels, placed on the real roads */
+  MAPDATA.labels.forEach(function(s){
     var t = el("text", {
-      x: X(s.label[0]), y: Y(s.label[1]), "class": "road-label",
-      transform: "rotate(" + (s.angle || 0) + " " + X(s.label[0]) + " " + Y(s.label[1]) + ")"
+      x: X(s.at[0]), y: Y(s.at[1]), "class": "road-label",
+      transform: "rotate(" + (s.angle || 0) + " " + X(s.at[0]) + " " + Y(s.at[1]) + ")"
     });
     t.textContent = s.name;
     svg.appendChild(t);
   });
-  var pondLabel = el("text", { x: X(-71.1645), y: Y(42.4042), "class": "water-label" });
+  var pondLabel = el("text", { x: X(-71.1555), y: Y(42.4068), "class": "water-label" });
   pondLabel.textContent = "Spy Pond";
   svg.appendChild(pondLabel);
 
@@ -2622,7 +2946,7 @@ function infoHTML(pIdx){
   var r = race();
   var html = '<button class="info-close" id="infoClose" type="button">Close</button>';
   html += "<h3>Precinct " + (pIdx + 1) + "</h3>";
-  html += '<div class="pop-sub">' + fmt(RESULTS.turnout[pIdx]) + " ballots cast</div>";
+  html += '<div class="pop-sub">' + fmt(RESULTS.turnout[pIdx]) + " ballots cast · 2020 Census population " + fmt(POP2020[pIdx]) + "</div>";
   r.candidates.forEach(function(c, i){
     var v = c.votes[pIdx];
     if (v == null){
@@ -2667,12 +2991,30 @@ function select(rIdx, mode, candIdx){
   if (selectedPrecinct >= 0) showPrecinct(selectedPrecinct);
 }
 
+/* ---------- precinct table in the demographics view ---------- */
+function buildPrecinctTable(){
+  var body = document.getElementById("precinctTableBody");
+  if (!body) return;
+  var totalBallots = 0;
+  RESULTS.turnout.forEach(function(v){ totalBallots += v; });
+  var html = "";
+  for (var i = 0; i < 21; i++){
+    html += "<tr><td>Precinct " + (i + 1) + "</td><td>" + fmt(POP2020[i]) + "</td><td>" +
+      fmt(RESULTS.turnout[i]) + "</td><td>" + pct(RESULTS.turnout[i] / totalBallots) + "</td></tr>";
+  }
+  html += "<tr><td><b>All of Arlington</b></td><td><b>" + fmt(POP2020.reduce(function(a,b){ return a + (b||0); }, 0)) +
+    "</b></td><td><b>" + fmt(totalBallots) + "</b></td><td><b>100%</b></td></tr>";
+  body.innerHTML = html;
+}
+
 /* ---------- start: everything is already on this page ---------- */
 buildButtons();
 markSelected();
 updateLegend();
 buildMap();
+buildPrecinctTable();
 })();
+
 </script>
 </body>
 </html>
