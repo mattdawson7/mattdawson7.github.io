@@ -16,7 +16,6 @@
     --radius:10px;
     --map-bg:#e9eee6; --street:#ffffff; --street-casing:#ccd3c9; --street-local:#d3dbd0; --water:#b8d4e8;
     --road-label:#5a6a7d; --precinct-stroke:#ffffff;
-    --track:#e6eaef;
   }
   @media (prefers-color-scheme: dark){
     :root{
@@ -27,7 +26,6 @@
       --shadow:0 1px 3px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
       --map-bg:#1e2a24; --street:#33413a; --street-casing:#232c39; --street-local:#2a362f; --water:#274b66;
       --road-label:#9db1a5; --precinct-stroke:#12161c;
-      --track:#2b3543;
     }
   }
   *{box-sizing:border-box}
@@ -50,37 +48,17 @@
   h1{font-size:19px; font-weight:800; margin:0; letter-spacing:-.01em; line-height:1.15}
   .top-stats{color:var(--ink2); font-size:12.5px; margin:0; font-weight:500}
 
-  /* ---------- view + layout controls ---------- */
-  .controls{
-    max-width:1720px; margin:0 auto; padding:8px 16px 0; width:100%;
-    display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; flex:none;
-  }
-  .ctl-group{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
-  .ctl-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink3)}
-  .seg{display:inline-flex; border:1.5px solid var(--btn-line); border-radius:999px; overflow:hidden; background:var(--btn-bg)}
-  .seg button{
-    border:0; background:transparent; color:var(--btn-ink); padding:6px 14px;
-    font-size:13.5px; font-weight:600; line-height:1.2;
-  }
-  .seg button + button{border-left:1.5px solid var(--btn-line)}
-  .seg button.selected{background:var(--navy); color:#fff}
-  @media (prefers-color-scheme: dark){ .seg button.selected{background:#2c5282; color:#fff} }
-
-  /* ---------- desktop election layout: one screen, no page scroll ---------- */
+  /* ---------- responsive election layout (auto: no toggle) ---------- */
   .layout{
     max-width:1720px; margin:0 auto; padding:8px 16px 6px; width:100%;
     display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:14px; align-items:stretch;
   }
+  /* Wide screens: one-screen app — map fills the height, panel scrolls internally */
   @media (min-width:901px){
-    body.mode-desktop.view-election{display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden}
-    body.mode-desktop.view-election .layout{flex:1 1 auto; min-height:0}
+    body{display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden}
+    .layout{flex:1 1 auto; min-height:0}
+    .panel{overflow-y:auto}
   }
-  /* compact layout: single column, page scrolls (both views) */
-  body.mode-compact .layout{grid-template-columns:minmax(0,1fr)}
-  body.mode-compact #map{flex:none; display:block}
-  body.mode-compact #map svg{height:auto}
-  body.mode-compact .map-wrap{flex:none}
-  body.mode-compact .panel{overflow:visible}
 
   /* ---------- self-contained SVG map ---------- */
   .map-col{min-width:0; display:flex; flex-direction:column; min-height:0}
@@ -147,9 +125,6 @@
     background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
     box-shadow:var(--shadow); padding:12px 14px 10px; min-height:0;
   }
-  @media (min-width:901px){
-    body.mode-desktop.view-election .panel{overflow-y:auto}
-  }
   .panel h2{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink2); margin:0 0 8px; font-weight:700}
   .race-label{font-size:12.5px; font-weight:700; color:var(--ink2); margin:12px 0 5px}
   .race-label:first-of-type{margin-top:0}
@@ -174,52 +149,6 @@
   .q-grid .q-grad{width:24px; height:12px; border-radius:3px; flex:none; border:1px solid rgba(0,0,0,.22)}
   .opt-btn.selected .q-grad{border-color:rgba(255,255,255,.5)}
 
-  /* ---------- demographics ---------- */
-  .demo{max-width:1720px; margin:0 auto; padding:10px 16px 4px; width:100%}
-  .demo-intro{color:var(--ink2); font-size:13.5px; margin:2px 0 10px; max-width:75ch}
-  .kpi-row{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:14px}
-  .kpi{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    box-shadow:var(--shadow); padding:10px 13px 9px;
-  }
-  .kpi .k-val{font-size:21px; font-weight:800; letter-spacing:-.01em; line-height:1.15}
-  .kpi .k-lab{font-size:12px; color:var(--ink2); font-weight:600; margin-top:1px}
-  .kpi .k-sub{font-size:11.5px; color:var(--ink3)}
-  .demo-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:14px; align-items:start}
-  .dcard{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    box-shadow:var(--shadow); padding:13px 16px 12px;
-  }
-  .dcard.wide{grid-column:1 / -1}
-  .dcard h2{font-size:15.5px; font-weight:800; margin:0 0 2px; letter-spacing:-.01em}
-  .dcard .d-sub{font-size:12.5px; color:var(--ink2); margin:0 0 9px}
-  .bar-row{display:grid; grid-template-columns:118px minmax(0,1fr) 76px; gap:8px; align-items:center; padding:2.5px 0; font-size:13px}
-  .bar-row .b-lab{color:var(--ink); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .bar-track{background:var(--track); height:13px; border-radius:4px; overflow:hidden}
-  .bar-fill{height:100%; border-radius:4px; background:var(--accent)}
-  .bar-fill.g{background:var(--accent2)} .bar-fill.o{background:var(--accent3)} .bar-fill.n{background:var(--navy)}
-  @media (prefers-color-scheme: dark){ .bar-fill.n{background:var(--accent)} }
-  .bar-row .b-val{text-align:right; color:var(--ink2); font-weight:600; white-space:nowrap}
-  .fact-list{margin:9px 0 0; padding:0; list-style:none; font-size:13.5px}
-  .fact-list li{padding:4px 0; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:12px}
-  .fact-list li:first-child{border-top:0}
-  .fact-list .f-lab{color:var(--ink2)}
-  .fact-list .f-val{font-weight:700; text-align:right; white-space:nowrap}
-  .tenure{display:flex; align-items:center; gap:16px; margin:4px 0 2px}
-  .tenure-legend{font-size:13.5px}
-  .tenure-legend div{padding:2px 0}
-  .swatch{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px}
-  table.cmp{border-collapse:collapse; width:100%; font-size:13.5px}
-  table.cmp th, table.cmp td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:right}
-  table.cmp th:first-child, table.cmp td:first-child{text-align:left}
-  table.cmp thead th{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink2); border-bottom:2px solid var(--line2)}
-  table.cmp td:first-child{color:var(--ink2); font-weight:600}
-  table.cmp td.hl{font-weight:800; color:var(--ink)}
-  .pct-table-wrap{overflow-x:auto}
-  table.pcts{border-collapse:collapse; width:100%; font-size:13px; min-width:520px}
-  table.pcts th, table.pcts td{padding:4.5px 8px; border-bottom:1px solid var(--line); text-align:right}
-  table.pcts th:first-child, table.pcts td:first-child{text-align:left}
-  table.pcts thead th{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink2)}
 
   footer{
     max-width:1720px; margin:0 auto; padding:8px 20px 12px; width:100%;
@@ -228,23 +157,19 @@
 
   [hidden]{display:none !important}
 
-  /* ---------- narrower screens: stack ---------- */
+  /* ---------- narrower screens: single column, page scrolls ---------- */
   @media (max-width:900px){
     .layout{grid-template-columns:minmax(0,1fr); padding:8px 12px 4px}
     #map{flex:none; display:block}
     #map svg{height:auto}
     .map-wrap{flex:none}
-    .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .demo{padding:10px 12px 4px}
-    .controls{padding:8px 12px 0}
-    footer{padding-bottom:14px}
-  }
-  @media (min-width:901px) and (max-width:1250px){
-    .kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .panel{overflow:visible}
+    header.top{padding:8px 12px 7px}
+    footer{padding:8px 12px 14px}
   }
 </style>
 </head>
-<body class="mode-desktop view-election">
+<body>
 
 <header class="top">
   <div class="top-inner">
@@ -252,23 +177,6 @@
     <p class="top-stats">Arlington, Massachusetts · Population 46,350 · 21 precincts · Middlesex County</p>
   </div>
 </header>
-
-<div class="controls">
-  <div class="ctl-group">
-    <span class="ctl-label" id="viewLabel">View</span>
-    <div class="seg" role="group" aria-labelledby="viewLabel">
-      <button type="button" id="tabElection" class="selected">Election map</button>
-      <button type="button" id="tabDemo">Demographics</button>
-    </div>
-  </div>
-  <div class="ctl-group">
-    <span class="ctl-label" id="layoutLabel">Layout</span>
-    <div class="seg" role="group" aria-labelledby="layoutLabel">
-      <button type="button" id="layDesktop" class="selected">Desktop</button>
-      <button type="button" id="layCompact">Compact</button>
-    </div>
-  </div>
-</div>
 
 <div id="electionView">
   <div class="layout">
@@ -297,212 +205,8 @@
   </div>
 </div>
 
-<main class="demo" id="demoView" hidden>
-  <p class="demo-intro">Who lives in Arlington — from the U.S. Census Bureau&rsquo;s American Community Survey, 2020&ndash;2024 five-year estimates, unless a figure is marked as the 2020 Census count. Middlesex County and Massachusetts figures are shown for comparison at the bottom.</p>
-
-  <div class="kpi-row">
-    <div class="kpi"><div class="k-val">46,350</div><div class="k-lab">Population</div><div class="k-sub">46,308 in the 2020 Census · est. 46,563 in 2025</div></div>
-    <div class="kpi"><div class="k-val">41.6 yrs</div><div class="k-lab">Median age</div><div class="k-sub">Men 40.4 · Women 42.9</div></div>
-    <div class="kpi"><div class="k-val">$150,701</div><div class="k-lab">Median household income</div><div class="k-sub">Per capita income $91,718</div></div>
-    <div class="kpi"><div class="k-val">$933,800</div><div class="k-lab">Median home value</div><div class="k-sub">Median gross rent $2,082/mo</div></div>
-    <div class="kpi"><div class="k-val">76.1%</div><div class="k-lab">Bachelor&rsquo;s degree or higher</div><div class="k-sub">Of residents age 25+</div></div>
-    <div class="kpi"><div class="k-val">20,005</div><div class="k-lab">Households</div><div class="k-sub">2.30 persons per household</div></div>
-  </div>
-
-  <div class="demo-grid">
-    <section class="dcard">
-      <h2>Age</h2>
-      <p class="d-sub">Share of the 46,350 residents in each age band.</p>
-      <div class="bar-row"><span class="b-lab">Under 5</span><div class="bar-track"><div class="bar-fill" style="width:9.5%"></div></div><span class="b-val">2,201 · 4.7%</span></div>
-      <div class="bar-row"><span class="b-lab">5 to 17</span><div class="bar-track"><div class="bar-fill" style="width:31.6%"></div></div><span class="b-val">7,315 · 15.8%</span></div>
-      <div class="bar-row"><span class="b-lab">18 to 34</span><div class="bar-track"><div class="bar-fill" style="width:39%"></div></div><span class="b-val">9,033 · 19.5%</span></div>
-      <div class="bar-row"><span class="b-lab">35 to 49</span><div class="bar-track"><div class="bar-fill" style="width:44.6%"></div></div><span class="b-val">10,351 · 22.3%</span></div>
-      <div class="bar-row"><span class="b-lab">50 to 64</span><div class="bar-track"><div class="bar-fill" style="width:40.6%"></div></div><span class="b-val">9,420 · 20.3%</span></div>
-      <div class="bar-row"><span class="b-lab">65 to 74</span><div class="bar-track"><div class="bar-fill" style="width:19.8%"></div></div><span class="b-val">4,585 · 9.9%</span></div>
-      <div class="bar-row"><span class="b-lab">75 and over</span><div class="bar-track"><div class="bar-fill" style="width:14.8%"></div></div><span class="b-val">3,445 · 7.4%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Under 18</span><span class="f-val">9,516 · 20.5%</span></li>
-        <li><span class="f-lab">Age 65 and over</span><span class="f-val">8,030 · 17.3%</span></li>
-        <li><span class="f-lab">Women</span><span class="f-val">52.6% of residents</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Race &amp; ethnicity</h2>
-      <p class="d-sub">Race alone, as reported in the ACS. Hispanic or Latino residents (4.9%) are counted within the race groups.</p>
-      <div class="bar-row"><span class="b-lab">White</span><div class="bar-track"><div class="bar-fill n" style="width:74.3%"></div></div><span class="b-val">34,441 · 74.3%</span></div>
-      <div class="bar-row"><span class="b-lab">Asian</span><div class="bar-track"><div class="bar-fill n" style="width:13%"></div></div><span class="b-val">6,024 · 13.0%</span></div>
-      <div class="bar-row"><span class="b-lab">Two or more</span><div class="bar-track"><div class="bar-fill n" style="width:8.7%"></div></div><span class="b-val">4,010 · 8.7%</span></div>
-      <div class="bar-row"><span class="b-lab">Black</span><div class="bar-track"><div class="bar-fill n" style="width:2%"></div></div><span class="b-val">931 · 2.0%</span></div>
-      <div class="bar-row"><span class="b-lab">Some other race</span><div class="bar-track"><div class="bar-fill n" style="width:1.9%"></div></div><span class="b-val">894 · 1.9%</span></div>
-      <div class="bar-row"><span class="b-lab">Native / Pacific Is.</span><div class="bar-track"><div class="bar-fill n" style="width:.5%"></div></div><span class="b-val">50 · 0.1%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Hispanic or Latino (any race)</span><span class="f-val">2,266 · 4.9%</span></li>
-        <li><span class="f-lab">Foreign-born</span><span class="f-val">8,609 · 18.6%</span></li>
-        <li><span class="f-lab">Foreign-born, naturalized citizens</span><span class="f-val">4,373</span></li>
-        <li><span class="f-lab">Foreign-born, not yet citizens</span><span class="f-val">4,236</span></li>
-        <li><span class="f-lab">Born in the United States</span><span class="f-val">37,741 · 81.4%</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Household income</h2>
-      <p class="d-sub">Distribution of Arlington&rsquo;s 20,005 households by annual income.</p>
-      <div class="bar-row"><span class="b-lab">Under $25k</span><div class="bar-track"><div class="bar-fill g" style="width:22.7%"></div></div><span class="b-val">1,714 · 8.6%</span></div>
-      <div class="bar-row"><span class="b-lab">$25k&ndash;$50k</span><div class="bar-track"><div class="bar-fill g" style="width:18.7%"></div></div><span class="b-val">1,421 · 7.1%</span></div>
-      <div class="bar-row"><span class="b-lab">$50k&ndash;$75k</span><div class="bar-track"><div class="bar-fill g" style="width:17.7%"></div></div><span class="b-val">1,332 · 6.7%</span></div>
-      <div class="bar-row"><span class="b-lab">$75k&ndash;$100k</span><div class="bar-track"><div class="bar-fill g" style="width:23.3%"></div></div><span class="b-val">1,769 · 8.8%</span></div>
-      <div class="bar-row"><span class="b-lab">$100k&ndash;$150k</span><div class="bar-track"><div class="bar-fill g" style="width:48.8%"></div></div><span class="b-val">3,695 · 18.5%</span></div>
-      <div class="bar-row"><span class="b-lab">$150k&ndash;$200k</span><div class="bar-track"><div class="bar-fill g" style="width:33%"></div></div><span class="b-val">2,502 · 12.5%</span></div>
-      <div class="bar-row"><span class="b-lab">$200k or more</span><div class="bar-track"><div class="bar-fill g" style="width:100%"></div></div><span class="b-val">7,572 · 37.9%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Households earning $100k+</span><span class="f-val">13,769 · 68.8%</span></li>
-        <li><span class="f-lab">Residents below the poverty line</span><span class="f-val">2,477 · 5.4%</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Education</h2>
-      <p class="d-sub">Highest level completed, residents age 25 and over (34,941 people).</p>
-      <div class="bar-row"><span class="b-lab">Graduate / prof.</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="b-val">16,248 · 46.5%</span></div>
-      <div class="bar-row"><span class="b-lab">Bachelor&rsquo;s</span><div class="bar-track"><div class="bar-fill" style="width:63.7%"></div></div><span class="b-val">10,336 · 29.6%</span></div>
-      <div class="bar-row"><span class="b-lab">Associate degree</span><div class="bar-track"><div class="bar-fill" style="width:20.9%"></div></div><span class="b-val">3,395 · 9.7%</span></div>
-      <div class="bar-row"><span class="b-lab">High school</span><div class="bar-track"><div class="bar-fill" style="width:18.5%"></div></div><span class="b-val">3,000 · 8.6%</span></div>
-      <div class="bar-row"><span class="b-lab">Some college</span><div class="bar-track"><div class="bar-fill" style="width:7.7%"></div></div><span class="b-val">1,247 · 3.6%</span></div>
-      <div class="bar-row"><span class="b-lab">No diploma</span><div class="bar-track"><div class="bar-fill" style="width:4.3%"></div></div><span class="b-val">715 · 2.0%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Master&rsquo;s degrees</span><span class="f-val">9,765</span></li>
-        <li><span class="f-lab">Doctorates</span><span class="f-val">4,046</span></li>
-        <li><span class="f-lab">Professional degrees</span><span class="f-val">2,437</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Work &amp; commuting</h2>
-      <p class="d-sub">How Arlington&rsquo;s 26,959 workers get to work — and how long it takes.</p>
-      <div class="bar-row"><span class="b-lab">Drove alone</span><div class="bar-track"><div class="bar-fill o" style="width:100%"></div></div><span class="b-val">11,740 · 43.5%</span></div>
-      <div class="bar-row"><span class="b-lab">Worked from home</span><div class="bar-track"><div class="bar-fill o" style="width:79.2%"></div></div><span class="b-val">9,295 · 34.5%</span></div>
-      <div class="bar-row"><span class="b-lab">Public transit</span><div class="bar-track"><div class="bar-fill o" style="width:25.5%"></div></div><span class="b-val">2,988 · 11.1%</span></div>
-      <div class="bar-row"><span class="b-lab">Walked</span><div class="bar-track"><div class="bar-fill o" style="width:10.7%"></div></div><span class="b-val">1,257 · 4.7%</span></div>
-      <div class="bar-row"><span class="b-lab">Carpooled</span><div class="bar-track"><div class="bar-fill o" style="width:6.9%"></div></div><span class="b-val">806 · 3.0%</span></div>
-      <div class="bar-row"><span class="b-lab">Bike / other</span><div class="bar-track"><div class="bar-fill o" style="width:6.9%"></div></div><span class="b-val">808 · 3.0%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Transit riders — subway / rail</span><span class="f-val">1,901</span></li>
-        <li><span class="f-lab">Transit riders — bus</span><span class="f-val">1,087</span></li>
-        <li><span class="f-lab">In the labor force (age 16+)</span><span class="f-val">28,126 · 74.2%</span></li>
-        <li><span class="f-lab">Unemployment rate</span><span class="f-val">2.9%</span></li>
-        <li><span class="f-lab">Commute under 15 minutes</span><span class="f-val">13.9% of commuters</span></li>
-        <li><span class="f-lab">Commute 45 minutes or more</span><span class="f-val">27.3% of commuters</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Households &amp; families</h2>
-      <p class="d-sub">Living arrangements across Arlington&rsquo;s 20,005 households.</p>
-      <div class="bar-row"><span class="b-lab">Family households</span><div class="bar-track"><div class="bar-fill n" style="width:100%"></div></div><span class="b-val">12,105 · 60.5%</span></div>
-      <div class="bar-row"><span class="b-lab">Married-couple</span><div class="bar-track"><div class="bar-fill n" style="width:84%"></div></div><span class="b-val">10,171 · 50.8%</span></div>
-      <div class="bar-row"><span class="b-lab">Nonfamily</span><div class="bar-track"><div class="bar-fill n" style="width:65.3%"></div></div><span class="b-val">7,900 · 39.5%</span></div>
-      <div class="bar-row"><span class="b-lab">Living alone</span><div class="bar-track"><div class="bar-fill n" style="width:52.3%"></div></div><span class="b-val">6,324 · 31.6%</span></div>
-      <div class="bar-row"><span class="b-lab">Other family</span><div class="bar-track"><div class="bar-fill n" style="width:16%"></div></div><span class="b-val">1,934 · 9.7%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Persons per household</span><span class="f-val">2.30</span></li>
-        <li><span class="f-lab">Other family (no spouse present)</span><span class="f-val">1,934 households</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Housing — own or rent</h2>
-      <p class="d-sub">20,746 housing units; 20,005 occupied, 741 vacant (3.6%).</p>
-      <div class="tenure">
-        <svg width="104" height="104" viewBox="0 0 104 104" role="img" aria-label="Owner-occupied 61.6 percent, renter-occupied 38.4 percent">
-          <circle cx="52" cy="52" r="42" fill="none" stroke="var(--accent3)" stroke-width="17"></circle>
-          <circle cx="52" cy="52" r="42" fill="none" stroke="var(--accent)" stroke-width="17"
-            stroke-dasharray="162.6 263.9" transform="rotate(-90 52 52)"></circle>
-        </svg>
-        <div class="tenure-legend">
-          <div><span class="swatch" style="background:var(--accent)"></span>Owner-occupied — 12,325 · 61.6%</div>
-          <div><span class="swatch" style="background:var(--accent3)"></span>Renter-occupied — 7,680 · 38.4%</div>
-        </div>
-      </div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Median home value</span><span class="f-val">$933,800</span></li>
-        <li><span class="f-lab">Median gross rent</span><span class="f-val">$2,082 / month</span></li>
-        <li><span class="f-lab">Median year built</span><span class="f-val">1945</span></li>
-        <li><span class="f-lab">Vacancy rate</span><span class="f-val">3.6%</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Housing — what&rsquo;s built</h2>
-      <p class="d-sub">Units in structure, and when Arlington&rsquo;s housing was built.</p>
-      <div class="bar-row"><span class="b-lab">Single-family, detached</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="b-val">7,856 · 37.9%</span></div>
-      <div class="bar-row"><span class="b-lab">Two-family</span><div class="bar-track"><div class="bar-fill" style="width:63.1%"></div></div><span class="b-val">4,957 · 23.9%</span></div>
-      <div class="bar-row"><span class="b-lab">20+ units</span><div class="bar-track"><div class="bar-fill" style="width:35.6%"></div></div><span class="b-val">2,796 · 13.5%</span></div>
-      <div class="bar-row"><span class="b-lab">5 to 19 units</span><div class="bar-track"><div class="bar-fill" style="width:30.1%"></div></div><span class="b-val">2,374 · 11.4%</span></div>
-      <div class="bar-row"><span class="b-lab">Single-family, attached</span><div class="bar-track"><div class="bar-fill" style="width:19.5%"></div></div><span class="b-val">1,532 · 7.4%</span></div>
-      <div class="bar-row"><span class="b-lab">3 to 4 units</span><div class="bar-track"><div class="bar-fill" style="width:14.5%"></div></div><span class="b-val">1,151 · 5.5%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Built 1939 or earlier</span><span class="f-val">9,774 · 47.1%</span></li>
-        <li><span class="f-lab">Built 1940&ndash;1959</span><span class="f-val">3,813 · 18.4%</span></li>
-        <li><span class="f-lab">Built 1960&ndash;1979</span><span class="f-val">4,216 · 20.3%</span></li>
-        <li><span class="f-lab">Built 1980&ndash;1999</span><span class="f-val">1,270 · 6.1%</span></li>
-        <li><span class="f-lab">Built 2000 or later</span><span class="f-val">1,673 · 8.1%</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard">
-      <h2>Commute time</h2>
-      <p class="d-sub">Travel time for the 17,664 workers who don&rsquo;t work from home.</p>
-      <div class="bar-row"><span class="b-lab">Under 15 min</span><div class="bar-track"><div class="bar-fill o" style="width:46%"></div></div><span class="b-val">2,450 · 13.9%</span></div>
-      <div class="bar-row"><span class="b-lab">15 to 29 min</span><div class="bar-track"><div class="bar-fill o" style="width:100%"></div></div><span class="b-val">5,332 · 30.2%</span></div>
-      <div class="bar-row"><span class="b-lab">30 to 44 min</span><div class="bar-track"><div class="bar-fill o" style="width:95%"></div></div><span class="b-val">5,066 · 28.7%</span></div>
-      <div class="bar-row"><span class="b-lab">45 to 59 min</span><div class="bar-track"><div class="bar-fill o" style="width:53.9%"></div></div><span class="b-val">2,874 · 16.3%</span></div>
-      <div class="bar-row"><span class="b-lab">60 min or more</span><div class="bar-track"><div class="bar-fill o" style="width:36.4%"></div></div><span class="b-val">1,942 · 11.0%</span></div>
-      <ul class="fact-list">
-        <li><span class="f-lab">Workers 16 and over</span><span class="f-val">26,959</span></li>
-        <li><span class="f-lab">Work from home share</span><span class="f-val">34.5%</span></li>
-      </ul>
-    </section>
-
-    <section class="dcard wide">
-      <h2>Arlington compared</h2>
-      <p class="d-sub">Same ACS 2020&ndash;2024 five-year estimates, three geographies.</p>
-      <div class="pct-table-wrap">
-      <table class="cmp">
-        <thead><tr><th>Measure</th><th>Arlington</th><th>Middlesex County</th><th>Massachusetts</th></tr></thead>
-        <tbody>
-          <tr><td>Median age</td><td class="hl">41.6</td><td>38.9</td><td>40.0</td></tr>
-          <tr><td>Median household income</td><td class="hl">$150,701</td><td>$130,847</td><td>$103,960</td></tr>
-          <tr><td>Per capita income</td><td class="hl">$91,718</td><td>$69,556</td><td>$57,897</td></tr>
-          <tr><td>Median home value</td><td class="hl">$933,800</td><td>$727,800</td><td>$562,100</td></tr>
-          <tr><td>Median gross rent</td><td class="hl">$2,082</td><td>$2,201</td><td>$1,762</td></tr>
-          <tr><td>Bachelor&rsquo;s degree or higher</td><td class="hl">76.1%</td><td>59.5%</td><td>47.3%</td></tr>
-          <tr><td>Below the poverty line</td><td class="hl">5.4%</td><td>7.7%</td><td>10.0%</td></tr>
-          <tr><td>Foreign-born</td><td class="hl">18.6%</td><td>23.1%</td><td>18.0%</td></tr>
-          <tr><td>White alone</td><td class="hl">74.3%</td><td>66.8%</td><td>68.6%</td></tr>
-          <tr><td>Hispanic or Latino</td><td class="hl">4.9%</td><td>9.3%</td><td>13.3%</td></tr>
-          <tr><td>Owner-occupied homes</td><td class="hl">61.6%</td><td>61.3%</td><td>62.5%</td></tr>
-          <tr><td>Median year home built</td><td class="hl">1945</td><td>1962</td><td>1964</td></tr>
-        </tbody>
-      </table>
-      </div>
-    </section>
-
-    <section class="dcard wide">
-      <h2>Precincts at a glance</h2>
-      <p class="d-sub">2020 Census population and ballots cast in the Nov 3, 2026 state election, by precinct.</p>
-      <div class="pct-table-wrap">
-        <table class="pcts">
-          <thead><tr><th>Precinct</th><th>Population (2020)</th><th>Ballots cast (2026)</th><th>Share of town ballots</th></tr></thead>
-          <tbody id="precinctTableBody"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-</main>
-
 <footer>
-  Election results: unofficial, Town of Arlington, state election of Nov 3, 2026. Demographics: U.S. Census Bureau, American Community Survey 2020&ndash;2024 five-year estimates (via Census Reporter) and the 2020 Census; see also <a href="https://www.census.gov/quickfacts/fact/table/arlingtontownmiddlesexcountymassachusetts/POP815223">Census QuickFacts for Arlington town</a>. Roads: U.S. Census Bureau TIGER road centerlines, clipped to the town boundary. Water: MassGIS hydrography. Precinct boundaries: MassGIS Wards &amp; Precincts, 2022.
+  Election results: unofficial, Town of Arlington, state election of Nov 3, 2026. Roads: U.S. Census Bureau TIGER road centerlines, clipped to the town boundary. Water: MassGIS hydrography. Precinct boundaries: MassGIS Wards &amp; Precincts, 2022.
 </footer>
 
 <script>
@@ -2585,31 +2289,6 @@ var GEO = {"type": "FeatureCollection", "features": [{"type": "Feature", "id": 5
 (function(){
 "use strict";
 
-/* ---------- view + layout switching ---------- */
-var tabElection = document.getElementById("tabElection");
-var tabDemo = document.getElementById("tabDemo");
-var layDesktop = document.getElementById("layDesktop");
-var layCompact = document.getElementById("layCompact");
-function setView(demo){
-  document.body.classList.toggle("view-demo", demo);
-  document.body.classList.toggle("view-election", !demo);
-  document.getElementById("electionView").hidden = demo;
-  document.getElementById("demoView").hidden = !demo;
-  tabElection.classList.toggle("selected", !demo);
-  tabDemo.classList.toggle("selected", demo);
-  window.scrollTo(0, 0);
-}
-function setLayout(compact){
-  document.body.classList.toggle("mode-compact", compact);
-  document.body.classList.toggle("mode-desktop", !compact);
-  layDesktop.classList.toggle("selected", !compact);
-  layCompact.classList.toggle("selected", compact);
-}
-tabElection.addEventListener("click", function(){ setView(false); });
-tabDemo.addEventListener("click", function(){ setView(true); });
-layDesktop.addEventListener("click", function(){ setLayout(false); });
-layCompact.addEventListener("click", function(){ setLayout(true); });
-
 var CAT = ["#2563a8","#c0392b","#1e8449","#7d4fc9","#d97706","#0e7c86","#b03a6b","#5b7a1e"];
 var YES_COLOR = "#1e8449", NO_COLOR = "#c05a2e";
 var GRAY_FILL = "#c9cfd6";
@@ -2887,7 +2566,23 @@ function buildMap(){
   drawStreets(MAPDATA.streets.primary, "street-casing", 8);
   drawStreets(MAPDATA.streets.primary, "street-line", 5);
 
-  /* precinct fills over the street network */
+  /* major-road labels + pond label, drawn UNDER the precinct colors:
+     streets and street names sit below the semi-transparent fills and
+     show through them (precinct fill-opacity is .62) */
+  MAPDATA.labels.forEach(function(s){
+    var t = el("text", {
+      x: X(s.at[0]), y: Y(s.at[1]), "class": "road-label",
+      transform: "rotate(" + (s.angle || 0) + " " + X(s.at[0]) + " " + Y(s.at[1]) + ")"
+    });
+    t.textContent = s.name;
+    svg.appendChild(t);
+  });
+  var pondLabel = el("text", { x: X(-71.1555), y: Y(42.4068), "class": "water-label" });
+  pondLabel.textContent = "Spy Pond";
+  svg.appendChild(pondLabel);
+
+  /* precinct fills OVER the street network and street names — appended last
+     among the base layers so the translucent colors tint the roads beneath */
   precinctPaths = [];
   POP2020 = [];
   var labelData = [];
@@ -2912,19 +2607,6 @@ function buildMap(){
     precinctPaths[pIdx] = path;
     labelData.push({ n: pNum, c: centroid(f.geometry) });
   });
-
-  /* major-road labels, placed on the real roads */
-  MAPDATA.labels.forEach(function(s){
-    var t = el("text", {
-      x: X(s.at[0]), y: Y(s.at[1]), "class": "road-label",
-      transform: "rotate(" + (s.angle || 0) + " " + X(s.at[0]) + " " + Y(s.at[1]) + ")"
-    });
-    t.textContent = s.name;
-    svg.appendChild(t);
-  });
-  var pondLabel = el("text", { x: X(-71.1555), y: Y(42.4068), "class": "water-label" });
-  pondLabel.textContent = "Spy Pond";
-  svg.appendChild(pondLabel);
 
   /* precinct numbers on top */
   labelData.forEach(function(L){
@@ -2991,28 +2673,11 @@ function select(rIdx, mode, candIdx){
   if (selectedPrecinct >= 0) showPrecinct(selectedPrecinct);
 }
 
-/* ---------- precinct table in the demographics view ---------- */
-function buildPrecinctTable(){
-  var body = document.getElementById("precinctTableBody");
-  if (!body) return;
-  var totalBallots = 0;
-  RESULTS.turnout.forEach(function(v){ totalBallots += v; });
-  var html = "";
-  for (var i = 0; i < 21; i++){
-    html += "<tr><td>Precinct " + (i + 1) + "</td><td>" + fmt(POP2020[i]) + "</td><td>" +
-      fmt(RESULTS.turnout[i]) + "</td><td>" + pct(RESULTS.turnout[i] / totalBallots) + "</td></tr>";
-  }
-  html += "<tr><td><b>All of Arlington</b></td><td><b>" + fmt(POP2020.reduce(function(a,b){ return a + (b||0); }, 0)) +
-    "</b></td><td><b>" + fmt(totalBallots) + "</b></td><td><b>100%</b></td></tr>";
-  body.innerHTML = html;
-}
-
 /* ---------- start: everything is already on this page ---------- */
 buildButtons();
 markSelected();
 updateLegend();
 buildMap();
-buildPrecinctTable();
 })();
 
 </script>
