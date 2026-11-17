@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Airbnb Pricing Dashboard — 212 Pleasant Street, Arlington</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#faf9f6; --surface:#ffffff; --text:#1d2420; --dim:#5c665e;
+    --border:#e3e1d8; --accent:#14532d; --you:#c2410c; --hotel:#2563eb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#10140f; --surface:#1a1f19; --text:#eef2ec; --dim:#9aa79c;
+      --border:#2c332a; --accent:#7dc492; --you:#f0834c; --hotel:#6ea8f5;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",monospace}
+  main{max-width:48rem;margin:0 auto;padding:24px 20px 64px}
+  .intro{font-size:14px;font-weight:500;color:var(--dim);margin:0}
+  .stamp{font-size:12px;color:var(--dim);margin:6px 0 0}
+  /* pills */
+  .pillrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
+  .pill{appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--dim);
+    border-radius:999px;padding:0 10px;font-size:12px;font-weight:500;line-height:1;cursor:pointer;
+    min-height:32px;font-family:inherit;transition:background-color .15s,color .15s,border-color .15s}
+  .pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  @media (prefers-color-scheme: dark){ .pill[aria-pressed="true"]{color:#10140f} }
+  /* dual slider */
+  .range-dual{position:relative;height:32px}
+  .range-dual .track{position:absolute;left:0;right:0;top:50%;height:6px;transform:translateY(-50%);
+    border-radius:999px;background:var(--border);opacity:.6}
+  .range-dual .fill{position:absolute;top:50%;height:6px;transform:translateY(-50%);
+    border-radius:999px;background:var(--accent)}
+  .range-dual input[type="range"]{-webkit-appearance:none;appearance:none;position:absolute;left:0;top:50%;
+    transform:translateY(-50%);width:100%;height:22px;min-height:22px;margin:0;background:transparent;pointer-events:none}
+  .range-dual input[type="range"]::-webkit-slider-runnable-track{height:22px;background:transparent}
+  .range-dual input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;pointer-events:auto;
+    width:22px;height:22px;border-radius:9999px;background:var(--surface);border:2px solid var(--accent);
+    box-shadow:0 1px 3px rgb(0 0 0/.3);cursor:grab}
+  .range-dual input[type="range"]::-moz-range-track{height:22px;background:transparent}
+  .range-dual input[type="range"]::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:9999px;
+    background:var(--surface);border:2px solid var(--accent);box-shadow:0 1px 3px rgb(0 0 0/.3);cursor:grab}
+  .windates{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:12px;color:var(--dim)}
+  /* ladder */
+  .ladder{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px 0;margin-top:16px}
+  .lrow{display:flex;align-items:center;gap:8px;padding:4px 0}
+  .lrow .lab{width:7.5rem;flex-shrink:0;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  @media (min-width:640px){ .lrow .lab{width:9rem} }
+  .lrow .barwrap{position:relative;flex:1;min-width:0;height:12px;border-radius:4px;background:color-mix(in srgb,var(--border) 50%,transparent)}
+  .lrow .bar{position:absolute;top:0;height:12px;border-radius:4px}
+  .lrow .val{width:5.5rem;flex-shrink:0;text-align:right;font-size:12px;font-weight:600}
+  @media (min-width:640px){ .lrow .val{width:6rem;font-size:14px} }
+  .axisrow{display:flex;align-items:center;gap:8px;padding-top:4px}
+  .axisrow .sp{width:7.5rem;flex-shrink:0}
+  @media (min-width:640px){ .axisrow .sp{width:9rem} }
+  .axisrow .ax{flex:1;min-width:0;display:flex;justify-content:space-between;font-size:10px;line-height:1;color:var(--dim)}
+  .axisrow .sp2{width:5.5rem;flex-shrink:0}
+  @media (min-width:640px){ .axisrow .sp2{width:6rem} }
+  .legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:8px;font-size:12px;color:var(--dim)}
+  .legend .dot{display:inline-block;width:8px;height:8px;border-radius:999px;margin-right:6px;vertical-align:1px}
+  /* delta strip */
+  .delta{margin-top:16px;border-top:1px solid var(--border);padding-top:12px}
+  .delta .cap{font-size:12px;font-weight:500;color:var(--dim);margin:0}
+  .delta .vals{display:flex;flex-wrap:wrap;gap:6px 24px;margin-top:6px}
+  .delta .vals p{margin:0;font-size:14px;color:var(--dim)}
+  .delta .vals b{font-weight:600}
+  /* premium chart */
+  .premium{margin-top:40px}
+  .premium h2{font-size:18px;font-weight:600;margin:0}
+  .premium .sub{font-size:14px;color:var(--dim);margin:4px 0 0}
+  .pchart{display:flex;gap:8px;margin-top:20px}
+  .paxis{position:relative;height:176px;width:40px;flex-shrink:0}
+  .paxis span{position:absolute;right:0;font-size:10px;color:var(--dim);transform:translateY(50%)}
+  .paxis span.top{transform:translateY(-50%)}
+  .pbody{flex:1;min-width:0}
+  .pplot{position:relative;height:176px}
+  .pgrid{position:absolute;left:0;right:0;border-top:1px solid var(--border)}
+  .pcols{position:absolute;inset:0;display:flex;align-items:stretch;gap:4px}
+  .pcol{position:relative;flex:1;min-width:0}
+  .pcol .colbar{position:absolute;left:50%;transform:translateX(-50%);width:100%;max-width:40px;border-radius:3px 3px 0 0;background:var(--you)}
+  .pcol .colval{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:500;color:var(--you)}
+  .plabels{display:flex;gap:4px;margin-top:6px}
+  .plabels div{flex:1;min-width:0;text-align:center}
+  .plabels span{font-size:10px;color:var(--dim);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .plabels span.vert{display:inline-block;writing-mode:vertical-rl;white-space:nowrap;overflow:visible}
+  @media (min-width:640px){ .plabels span.vert{writing-mode:horizontal-tb} }
+  /* footer */
+  footer{margin-top:40px}
+  footer .note{font-size:12px;color:var(--dim);max-width:36rem;margin:0;line-height:1.5}
+  footer ul{list-style:none;margin:8px 0 0;padding:0}
+  footer li a{display:inline-block;padding:4px 0;font-size:12px;color:var(--dim);text-decoration:underline dotted;text-underline-offset:2px}
+  .empty{margin-top:40px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+    padding:32px 0;text-align:center;font-size:14px;color:var(--dim)}
+</style>
+</head>
+<body>
+<main>
+  <p class="intro">212 Pleasant Street, Arlington — Airbnb vs. the alternatives</p>
+  <p class="stamp" id="stamp"></p>
+
+  <section aria-label="Date window" style="margin-top:20px">
+    <div class="pillrow" role="group" aria-label="Jump to a year" id="yearRow"></div>
+    <div class="pillrow" role="group" aria-label="Jump to a season" id="seasonRow"></div>
+    <div class="pillrow" role="group" aria-label="Filter by night type" id="nightRow"></div>
+    <div class="range-dual" id="slider">
+      <div class="track"></div>
+      <div class="fill" id="sliderFill"></div>
+      <input type="range" id="fromRange" aria-label="Window start date" />
+      <input type="range" id="toRange" aria-label="Window end date" />
+    </div>
+    <div class="windates"><span id="fromLabel"></span><span id="toLabel"></span></div>
+  </section>
+
+  <div id="content"></div>
+</main>
+
+<script>
+"use strict";
+/* Dashboard data, injected at build time from the live Muse artifact's
+   getDashboard action. The baseline is carried as its implied per-night
+   rate only — this page shows per-night figures, nothing else. */
+const DATA = {"baselineAdr": 313, "fetchedAt": "2026-11-17T11:28:44.166Z", "fetchedLabel": "Nov 17, 2026, 6:28 AM", "lastRefreshError": null, "payload": {"airdnaActiveListings": 87, "airdnaAdr": 175, "airdnaEntireHomeAdr": null, "airdnaOccupancyPct": 72, "airdnaOneBrAdr": null, "airdnaSourceUrl": "https://www.airdna.co/vacation-rental-data/app/us/massachusetts/arlington/overview", "airdnaUpdatedLabel": "November 11, 2026", "airroiAdr": 235, "airroiEntireHomeAdr": null, "airroiOneBrAdr": null, "airroiSourceUrl": "https://www.airroi.com/airbnb-data/united-states/massachusetts/arlington", "hotels": [{"area": "Arlington \u2014 in town", "name": "Homewood Suites by Hilton Boston/Cambridge-Arlington", "nightlyHigh": 152, "nightlyLow": 122, "sourceName": "Google Travel", "sourceUrl": "https://www.google.ie/travel/hotels/entity/ChgIhdbS7PiOiejAARoLL2cvMXRmdG02a2wQAQ?ei=1Z5iaueEBouM_bMPtbb66A8&sa=X&ei=UvRnaoqjH5XWrcUPkNbF8A4&ved=2ahUKEwiKlMC-i_SVAxUVa6sCHRBrEe4Qv6wDKAF6BAgDEF8"}, {"area": "Alewife, Cambridge \u2014 ~3 mi", "name": "AC Hotel Boston Cambridge", "nightlyHigh": 205, "nightlyLow": 146, "sourceName": "Google Travel", "sourceUrl": "https://www.google.com.my/travel/hotels/entity/ChoIks6BvJmg4PfyARoNL2cvMTFjcnpmczQxcxAB?ei=BVjMarvKCMOEy-8P0-P0iAY&sa=X&ved=2ahUKEwj74NHQyLOXAxVDwvIHHdMxHWEQv6wDKAJ6BQgDENwB"}, {"area": "Alewife, Cambridge \u2014 ~3 mi", "name": "Freepoint Hotel Cambridge", "nightlyHigh": 138, "nightlyLow": 108, "sourceName": "Google Travel", "sourceUrl": "https://www.google.co.in/travel/hotels/entity/ChgIkP-5_sKZvoKoARoLL2cvMXRoZ2NnZnYQAQ/details?ei=oFNmariMF7Oq0L4PuOy1MQ&sa=X&utm_campaign=sharing&utm_medium=link&utm_source=htls&ts=GjYKNBIyMiUweDg5ZTM3MGE1Y2IzMGNjNWY6MHhjNTNhOGU2NDg5Njg2Yzg3OglDYW1icmlkZ2U&qs=CAE4Bg&ei=BaqDapayMtaGtvkPzIHhmA0&ved=2ahUKEwjWyN3I-KiWAxVuQgy0JHcxAGNMQgooIegUIAxC4AQ"}, {"area": "Cambridgeport \u2014 ~5 mi", "name": "Hyatt Regency Boston/Cambridge", "nightlyHigh": null, "nightlyLow": 152, "sourceName": "travelated.com", "sourceUrl": "https://www.travelated.com/usa/massachusetts/cambridge/hyatt-regency-bostoncambridge?destinationType=3&roomId=5%3A1soFTBB63dsHK&planId=17,54dcdaa2b1df456e19000001_2_1_5%3A1soFTBB63dsHK_r1&priceTotal=497.43&priceTax=83.07&utm_campaign=&utm_source=ghf_localuniversal&hotel&country=US&currency=USD&utm_medium=googlehotels&extraRooms=&breakdown=USD%7C59.88%3A0.00%3A0.00%7C0.00%3A23.19%3A0.00%7C497.43%7C1"}], "rabbuOneBrAdr": 110, "rabbuSourceUrl": "https://rabbu.com/airbnb-data/arlington-ma"}};
+
+/* ---------------- model (ported from the live dashboard) ---------------- */
+const DAY_MS = 86400000;
+const REF_DAYS = 365;
+const AXIS_FIRST_YEAR = 2025;
+const AXIS_LAST_YEAR = 2027;
+const YEAR_BUTTONS = [2025, 2026, 2027];
+const SEASON_BUTTONS = [
+  { name: "Winter", startMonth: 11 },
+  { name: "Spring", startMonth: 2 },
+  { name: "Summer", startMonth: 5 },
+  { name: "Fall", startMonth: 8 },
+];
+const NIGHT_BUTTONS = [
+  { key: "all", label: "All nights" },
+  { key: "weekday", label: "Weekdays" },
+  { key: "weekend", label: "Weekends" },
+];
+const MIN_WINDOW_NIGHTS = 7;
+
+const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
+
+function seasonOf(month) {
+  if (month === 11 || month <= 1) return { name: "Winter", weekday: 0.85, weekend: 1.0 };
+  if (month <= 4) return { name: "Spring", weekday: 0.95, weekend: 1.05 };
+  if (month <= 7) return { name: "Summer", weekday: 1.0, weekend: 1.15 };
+  return { name: "Fall", weekday: 1.0, weekend: 1.1 };
+}
+
+function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+
+function startOfToday() {
+  const ny = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+  return new Date(ny.getFullYear(), ny.getMonth(), ny.getDate());
+}
+
+function axisBounds(start) {
+  return {
+    min: Math.round((new Date(AXIS_FIRST_YEAR, 0, 1).getTime() - start.getTime()) / DAY_MS),
+    max: Math.round((new Date(AXIS_LAST_YEAR + 1, 2, 0).getTime() - start.getTime()) / DAY_MS),
+  };
+}
+
+function yearWindow(start, year) {
+  return {
+    from: Math.round((new Date(year, 0, 1).getTime() - start.getTime()) / DAY_MS),
+    to: Math.round((new Date(year, 11, 31).getTime() - start.getTime()) / DAY_MS),
+  };
+}
+
+function seasonWindow(start, startMonth) {
+  const b = axisBounds(start);
+  for (let y = start.getFullYear() - 1; y <= start.getFullYear() + 1; y++) {
+    const occStart = new Date(y, startMonth, 1);
+    const occEnd = new Date(y, startMonth + 3, 0);
+    if (occEnd.getTime() >= start.getTime()) {
+      return {
+        from: Math.max(b.min, Math.round((occStart.getTime() - start.getTime()) / DAY_MS)),
+        to: Math.min(b.max, Math.round((occEnd.getTime() - start.getTime()) / DAY_MS)),
+      };
+    }
+  }
+  return { from: 0, to: REF_DAYS - 1 };
+}
+
+function seasonInYear(start, startMonth, year) {
+  const b = axisBounds(start);
+  const occStart = new Date(year, startMonth, 1);
+  const occEnd = new Date(year, startMonth + 3, 0);
+  return {
+    from: Math.max(b.min, Math.round((occStart.getTime() - start.getTime()) / DAY_MS)),
+    to: Math.min(b.max, Math.round((occEnd.getTime() - start.getTime()) / DAY_MS)),
+  };
+}
+
+function resolveWindow(start, year, season) {
+  const def = SEASON_BUTTONS.find((s) => s.name === season);
+  if (year != null && def) return seasonInYear(start, def.startMonth, year);
+  if (year != null) return yearWindow(start, year);
+  if (def) return seasonWindow(start, def.startMonth);
+  return { from: 0, to: REF_DAYS - 1 };
+}
+
+function windowPriceStats(start, from, to, baseAdr) {
+  let wkSum = 0, wkN = 0, weSum = 0, weN = 0;
+  for (let off = from; off <= to; off++) {
+    const d = addDays(start, off);
+    const s = seasonOf(d.getMonth());
+    const day = d.getDay();
+    const weekend = day === 5 || day === 6 || day === 0;
+    if (weekend) { weSum += baseAdr * s.weekend; weN++; }
+    else { wkSum += baseAdr * s.weekday; wkN++; }
+  }
+  const nights = Math.max(0, to - from + 1);
+  return {
+    nights, wkN, weN,
+    wkAvg: wkN > 0 ? wkSum / wkN : null,
+    weAvg: weN > 0 ? weSum / weN : null,
+    blended: nights > 0 ? (wkSum + weSum) / nights : null,
+  };
+}
+
+function monthlyFactorRange(start, from, to, nightFilter) {
+  const buckets = new Map();
+  for (let off = from; off <= to; off++) {
+    const d = addDays(start, off);
+    const s = seasonOf(d.getMonth());
+    const day = d.getDay();
+    const weekend = day === 5 || day === 6 || day === 0;
+    if (nightFilter === "weekday" && weekend) continue;
+    if (nightFilter === "weekend" && !weekend) continue;
+    const key = d.getFullYear() + "-" + d.getMonth();
+    let b = buckets.get(key);
+    if (!b) { b = { sum: 0, n: 0 }; buckets.set(key, b); }
+    b.sum += weekend ? s.weekend : s.weekday;
+    b.n++;
+  }
+  const avgs = [...buckets.values()].filter((b) => b.n > 0).map((b) => b.sum / b.n);
+  if (avgs.length === 0) return null;
+  return { lo: Math.min(...avgs), hi: Math.max(...avgs) };
+}
+
+function monthlyPremiums(start, from, to, baseAdr, marketMid, nightFilter, calibration) {
+  const buckets = new Map();
+  for (let off = from; off <= to; off++) {
+    const d = addDays(start, off);
+    const s = seasonOf(d.getMonth());
+    const day = d.getDay();
+    const weekend = day === 5 || day === 6 || day === 0;
+    if (nightFilter === "weekday" && weekend) continue;
+    if (nightFilter === "weekend" && !weekend) continue;
+    const f = weekend ? s.weekend : s.weekday;
+    const key = d.getFullYear() + "-" + d.getMonth();
+    let b = buckets.get(key);
+    if (!b) {
+      const mon = d.toLocaleDateString("en-US", { month: "short" });
+      b = { label: mon + "'" + String(d.getFullYear()).slice(2), youSum: 0, n: 0 };
+      buckets.set(key, b);
+    }
+    b.youSum += baseAdr * f * calibration;
+    b.n++;
+  }
+  if (marketMid <= 0) return [];
+  return [...buckets.values()]
+    .filter((b) => b.n > 0)
+    .map((b) => ({ label: b.label, premium: ((b.youSum / b.n - marketMid) / marketMid) * 100 }));
+}
+
+function shortHotelName(name) {
+  if (name.includes("Homewood")) return "Homewood Suites";
+  if (name.includes("AC Hotel")) return "AC Hotel Cambridge";
+  if (name.includes("Freepoint")) return "Freepoint Hotel";
+  if (name.includes("Hyatt")) return "Hyatt Regency";
+  return name;
+}
+
+/* One shared computation for the whole page: every visual (rate ladder,
+   delta strip, premium chart) derives from this single view model, so
+   every control moves every visual, in combination. */
+function computeView(data, state, start) {
+  const baseAdr = data.baselineAdr;
+  const payload = data.payload;
+  const winStats = windowPriceStats(start, state.from, state.to, baseAdr);
+  const anchorStats = windowPriceStats(start, -REF_DAYS, -1, baseAdr);
+  const calibration =
+    anchorStats.blended != null && anchorStats.blended > 0 && baseAdr > 0
+      ? baseAdr / anchorStats.blended
+      : 1;
+  const pickAvg = (s) =>
+    state.nightFilter === "weekday" ? s.wkAvg :
+    state.nightFilter === "weekend" ? s.weAvg : s.blended;
+  const winAvgRaw = pickAvg(winStats);
+  const yourWindowAvg = winAvgRaw != null ? winAvgRaw * calibration : null;
+  const seasonalMultiplier = yourWindowAvg != null && baseAdr > 0 ? yourWindowAvg / baseAdr : 1;
+  const isFiltered = !(state.from === 0 && state.to === REF_DAYS - 1) || state.nightFilter !== "all";
+  const fmtDate = (off) =>
+    addDays(start, off).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const windowLabel = fmtDate(state.from) + " \u2013 " + fmtDate(state.to);
+
+  const monthFactors = monthlyFactorRange(start, state.from, state.to, state.nightFilter);
+  const scaleLo = monthFactors ? calibration * monthFactors.lo : seasonalMultiplier;
+  const scaleHi = monthFactors ? calibration * monthFactors.hi : seasonalMultiplier;
+  const adjustLo = (n) => (n == null ? null : n * scaleLo);
+  const adjustHi = (n) => (n == null ? null : n * scaleHi);
+
+  const rows = [];
+  if (baseAdr > 0) {
+    rows.push({
+      key: "you",
+      label: "212 Pleasant \u2014 you",
+      detail: isFiltered
+        ? "Monthly averages for " + windowLabel +
+          (state.nightFilter === "weekend" ? " \u00b7 weekend nights only" :
+           state.nightFilter === "weekday" ? " \u00b7 weekday nights only" : "")
+        : "Monthly range across the next 12 months",
+      kind: "you",
+      low: adjustLo(baseAdr),
+      high: adjustHi(baseAdr),
+    });
+  }
+  let marketMid = null;
+  let premiumBasis = "all listings";
+  if (payload) {
+    const catRow = (key, label, figs) => {
+      const present = figs.filter((f) => f.value != null);
+      if (present.length === 0) return null;
+      const vals = present.map((f) => f.value);
+      return {
+        key, label,
+        detail: present.length === 1
+          ? present[0].source + " only"
+          : "Range across " + present.map((f) => f.source).join(" and "),
+        kind: "market",
+        low: adjustLo(Math.min(...vals)),
+        high: adjustHi(Math.max(...vals)),
+      };
+    };
+    const categoryRows = [
+      catRow("whole", "Whole homes", [
+        { source: "AirDNA", value: payload.airdnaEntireHomeAdr },
+        { source: "AirROI", value: payload.airroiEntireHomeAdr },
+      ]),
+      catRow("onebr", "One bedrooms", [
+        { source: "AirDNA", value: payload.airdnaOneBrAdr },
+        { source: "AirROI", value: payload.airroiOneBrAdr },
+        { source: "Rabbu", value: payload.rabbuOneBrAdr },
+      ]),
+      catRow("total", "All listings", [
+        { source: "AirDNA", value: payload.airdnaAdr },
+        { source: "AirROI", value: payload.airroiAdr },
+      ]),
+    ].filter((r) => r != null);
+    rows.push(...categoryRows);
+    const totalRow = rows.find((r) => r.key === "total");
+    if (totalRow && payload.airdnaUpdatedLabel) {
+      totalRow.detail += " \u00b7 AirDNA data updated " + payload.airdnaUpdatedLabel;
+    }
+    for (const h of payload.hotels || []) {
+      rows.push({
+        key: "hotel-" + h.name,
+        label: shortHotelName(h.name),
+        detail: h.area + (h.sourceName ? " \u00b7 via " + h.sourceName : ""),
+        kind: "hotel",
+        low: adjustLo(h.nightlyLow),
+        high: adjustHi(h.nightlyHigh),
+      });
+    }
+    const rangeMid = (vals) => {
+      const present = vals.filter((n) => n != null);
+      return present.length > 0 ? (Math.min(...present) + Math.max(...present)) / 2 : null;
+    };
+    const wholeMid = rangeMid([payload.airdnaEntireHomeAdr, payload.airroiEntireHomeAdr]);
+    const totalMid = rangeMid([payload.airdnaAdr, payload.airroiAdr]);
+    marketMid = wholeMid != null ? wholeMid : totalMid;
+    premiumBasis = wholeMid != null ? "whole homes" : "all listings";
+  }
+
+  const rawHighs = [];
+  if (baseAdr > 0) rawHighs.push(baseAdr);
+  if (payload) {
+    const rawMarket = [
+      payload.airdnaAdr, payload.airroiAdr, payload.airdnaEntireHomeAdr,
+      payload.airroiEntireHomeAdr, payload.airdnaOneBrAdr, payload.airroiOneBrAdr,
+      payload.rabbuOneBrAdr,
+    ].filter((n) => n != null);
+    if (rawMarket.length > 0) rawHighs.push(Math.max(...rawMarket));
+    for (const h of payload.hotels || []) {
+      const v = h.nightlyHigh != null ? h.nightlyHigh : h.nightlyLow;
+      if (v != null) rawHighs.push(v);
+    }
+  }
+  const chartMax = Math.max(200, Math.ceil(((Math.max(0, ...rawHighs) * 1.25) / 50)) * 50);
+
+  const ladder = rows.map((row) => {
+    const hasBar = row.low != null;
+    const low = row.low != null ? row.low : 0;
+    const high = row.high != null ? row.high : low;
+    const widthPct = Math.max(2, ((high - low) / chartMax) * 100);
+    const leftPct = Math.min((low / chartMax) * 100, 100 - widthPct);
+    const priceLabel =
+      row.low == null ? "no rate" :
+      row.high != null && row.high > row.low ? money(row.low) + "\u2013" + money(row.high) :
+      money(row.low) + (row.kind === "hotel" ? "+" : "");
+    return { ...row, hasBar, leftPct, widthPct, priceLabel };
+  });
+
+  let delta = null;
+  if (yourWindowAvg != null && marketMid != null) {
+    const d = yourWindowAvg - marketMid;
+    const pct = marketMid > 0 ? (d / marketMid) * 100 : null;
+    if (pct != null) {
+      delta = {
+        caption: "Delta vs market \u00b7 " + windowLabel +
+          (state.nightFilter === "weekend" ? " \u00b7 weekend nights" :
+           state.nightFilter === "weekday" ? " \u00b7 weekday nights" : ""),
+        you: money(yourWindowAvg),
+        market: money(marketMid),
+        premium: (pct >= 0 ? "+" : "\u2212") + Math.abs(Math.round(pct)) + "% (" +
+          (d >= 0 ? "+" + money(d) : "\u2212" + money(-d)) + "/night)",
+      };
+    }
+  }
+
+  let premium = null;
+  if (marketMid != null && baseAdr > 0) {
+    const cols = monthlyPremiums(start, state.from, state.to, baseAdr, marketMid, state.nightFilter, calibration);
+    if (cols.length > 0) {
+      const values = cols.map((c) => c.premium);
+      const rawMax = Math.max(...values);
+      const rawMin = Math.min(...values);
+      const domMax = Math.max(20, Math.ceil((rawMax * 1.2) / 10) * 10);
+      const domMin = rawMin < 0 ? Math.floor((rawMin * 1.2) / 10) * 10 : 0;
+      const range = domMax - domMin;
+      const zeroPct = ((0 - domMin) / range) * 100;
+      const ticks = (domMin < 0 ? [domMax, 0, domMin] : [domMax, domMax / 2, 0])
+        .map((t) => ({ value: t, bottomPct: ((t - domMin) / range) * 100, label: Math.round(t) + "%" }));
+      premium = {
+        basisLabel: premiumBasis,
+        nightSuffix:
+          state.nightFilter === "weekend" ? " Weekend nights only." :
+          state.nightFilter === "weekday" ? " Weekday nights only." : "",
+        showValues: cols.length <= 14,
+        dense: cols.length > 8,
+        ticks, zeroPct,
+        columns: cols.map((c) => ({
+          label: c.label,
+          premium: c.premium,
+          pctLabel: (c.premium > 0 ? "+" : "") + Math.round(c.premium) + "%",
+          hPct: (Math.abs(c.premium) / range) * 100,
+          above: c.premium >= 0,
+        })),
+      };
+    }
+  }
+
+  const sources = [];
+  if (payload) {
+    if (payload.airdnaSourceUrl) sources.push({ name: "AirDNA \u2014 Arlington market data", url: payload.airdnaSourceUrl });
+    if (payload.airroiSourceUrl) sources.push({ name: "AirROI \u2014 Arlington market data", url: payload.airroiSourceUrl });
+    if (payload.rabbuSourceUrl) sources.push({ name: "Rabbu \u2014 Arlington market data (1-bedroom rate)", url: payload.rabbuSourceUrl });
+    const seen = new Set();
+    for (const h of payload.hotels || []) {
+      if (h.sourceUrl && !seen.has(h.sourceUrl)) {
+        seen.add(h.sourceUrl);
+        sources.push({ name: shortHotelName(h.name) + " rates" + (h.sourceName ? " \u2014 " + h.sourceName : ""), url: h.sourceUrl });
+      }
+    }
+  }
+
+  return {
+    windowLabel, fromLabel: fmtDate(state.from), toLabel: fmtDate(state.to),
+    chartMax, ladder, delta, premium, sources,
+    hasPayload: !!payload,
+  };
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { computeView, resolveWindow, axisBounds, DATA, YEAR_BUTTONS, SEASON_BUTTONS, REF_DAYS };
+}
+
+/* ---------------- rendering (browser only) ---------------- */
+if (typeof document !== "undefined") {
+  const start = startOfToday();
+  const bounds = axisBounds(start);
+  const state = { selYear: null, selSeason: null, nightFilter: "all", from: 0, to: REF_DAYS - 1 };
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function pill(label, pressed, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "pill";
+    b.textContent = label;
+    b.setAttribute("aria-pressed", pressed ? "true" : "false");
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function renderControls() {
+    const yr = $("yearRow"); yr.innerHTML = "";
+    for (const y of YEAR_BUTTONS) {
+      yr.appendChild(pill(String(y), state.selYear === y, () => {
+        applySelection(state.selYear === y ? null : y, state.selSeason);
+      }));
+    }
+    const sr = $("seasonRow"); sr.innerHTML = "";
+    for (const s of SEASON_BUTTONS) {
+      sr.appendChild(pill(s.name, state.selSeason === s.name, () => {
+        applySelection(state.selYear, state.selSeason === s.name ? null : s.name);
+      }));
+    }
+    const isAll = state.selYear == null && state.selSeason == null && state.from === bounds.min && state.to === bounds.max;
+    sr.appendChild(pill("All", isAll, () => {
+      state.selYear = null; state.selSeason = null;
+      state.from = bounds.min; state.to = bounds.max;
+      syncSlider(); render();
+    }));
+    const nr = $("nightRow"); nr.innerHTML = "";
+    for (const n of NIGHT_BUTTONS) {
+      nr.appendChild(pill(n.label, state.nightFilter === n.key, () => {
+        state.nightFilter = n.key; renderControls(); render();
+      }));
+    }
+  }
+
+  function applySelection(year, season) {
+    const w = resolveWindow(start, year, season);
+    state.selYear = year; state.selSeason = season;
+    state.from = w.from; state.to = w.to;
+    syncSlider(); renderControls(); render();
+  }
+
+  function syncSlider() {
+    const fr = $("fromRange"), tr = $("toRange");
+    fr.min = bounds.min; fr.max = bounds.max; fr.value = state.from;
+    tr.min = bounds.min; tr.max = bounds.max; tr.value = state.to;
+    fr.style.zIndex = state.from > (bounds.min + bounds.max) / 2 ? 30 : 10;
+    tr.style.zIndex = 20;
+    const pct = (v) => ((v - bounds.min) / (bounds.max - bounds.min)) * 100;
+    const fill = $("sliderFill");
+    fill.style.left = pct(state.from) + "%";
+    fill.style.width = (pct(state.to) - pct(state.from)) + "%";
+  }
+
+  function render() {
+    const view = computeView(DATA, state, start);
+    $("fromLabel").textContent = view.fromLabel;
+    $("toLabel").textContent = view.toLabel;
+    const c = $("content");
+    if (!view.hasPayload) {
+      c.innerHTML = '<div class="empty">No market snapshot yet. The live dashboard pulls current Arlington Airbnb and hotel rates every morning; check back after the next daily update.</div>';
+      return;
+    }
+    let html = "";
+    html += '<div class="ladder" role="img" aria-label="Per-night rate comparison chart">';
+    for (const row of view.ladder) {
+      const color = row.kind === "you" ? "var(--you)" : row.kind === "hotel" ? "var(--hotel)" : "var(--accent)";
+      html += '<div class="lrow"><p class="lab" title="' + esc(row.label + " \u2014 " + row.detail) + '" style="margin:0">' + esc(row.label) + "</p>" +
+        '<div class="barwrap">' + (row.hasBar ? '<div class="bar" style="left:' + row.leftPct + "%;width:" + row.widthPct + "%;background:" + color + '"></div>' : "") + "</div>" +
+        '<p class="val mono" style="margin:0;color:' + (row.hasBar ? color : "var(--dim)") + '">' + esc(row.priceLabel) + "</p></div>";
+    }
+    html += '<div class="axisrow" aria-hidden="true"><span class="sp"></span><span class="ax"><span>$0</span><span>' + money(view.chartMax) + '</span></span><span class="sp2"></span></div>';
+    html += "</div>";
+    html += '<div class="legend">' +
+      '<span><span class="dot" style="background:var(--you)"></span>Your place</span>' +
+      '<span><span class="dot" style="background:var(--accent)"></span>Airbnb market</span>' +
+      '<span><span class="dot" style="background:var(--hotel)"></span>Hotels</span></div>';
+
+    if (view.delta) {
+      html += '<div class="delta"><p class="cap">' + esc(view.delta.caption) + '</p><div class="vals">' +
+        '<p>You <b class="mono" style="color:var(--you)">' + view.delta.you + "</b></p>" +
+        '<p>Market <b class="mono" style="color:var(--accent)">' + view.delta.market + "</b></p>" +
+        '<p>Premium <b class="mono" style="color:var(--you)">' + view.delta.premium + "</b></p>" +
+        "</div></div>";
+    }
+
+    if (view.premium) {
+      const p = view.premium;
+      html += '<section class="premium" aria-label="212 price premium to market, by month"><h2>212 premium vs market</h2>' +
+        '<p class="sub">Your price vs. the ' + (p.basisLabel === "whole homes" ? "whole-homes" : "all-listings") +
+        " market midpoint, by month \u2014 dips in winter, peaks in summer." + esc(p.nightSuffix) + "</p>";
+      html += '<div class="pchart"><div class="paxis" aria-hidden="true">';
+      for (const t of p.ticks) {
+        html += '<span class="mono' + (t.value === Math.max(...p.ticks.map((x) => x.value)) ? " top" : "") +
+          '" style="bottom:' + t.bottomPct + '%">' + esc(t.label) + "</span>";
+      }
+      html += '</div><div class="pbody"><div class="pplot">';
+      for (const t of p.ticks) {
+        html += '<div class="pgrid" style="bottom:' + t.bottomPct + '%"></div>';
+      }
+      html += '<div class="pcols">';
+      for (const col of p.columns) {
+        html += '<div class="pcol" title="' + esc(col.label + ": " + col.pctLabel + " vs market") + '">';
+        if (p.showValues) {
+          const vStyle = col.above
+            ? "bottom:calc(" + (p.zeroPct + col.hPct) + "% + 3px)"
+            : "bottom:calc(" + (p.zeroPct - col.hPct) + "% - 15px)";
+          html += '<span class="colval mono" style="' + vStyle + '">' + esc(col.pctLabel) + "</span>";
+        }
+        const bStyle = col.above
+          ? "bottom:" + p.zeroPct + "%;height:" + col.hPct + "%"
+          : "bottom:" + (p.zeroPct - col.hPct) + "%;height:" + col.hPct + "%";
+        html += '<div class="colbar" style="' + bStyle + '"></div></div>';
+      }
+      html += '</div></div><div class="plabels">';
+      for (const col of p.columns) {
+        html += "<div><span" + (p.dense ? ' class="vert"' : "") + ">" + esc(col.label) + "</span></div>";
+      }
+      html += "</div></div></div></section>";
+    }
+
+    if (DATA.lastRefreshError) {
+      html += '<p style="margin-top:40px;font-size:14px;color:var(--you)">The live dashboard\u2019s last refresh didn\u2019t complete (' +
+        esc(DATA.lastRefreshError) + "). Showing the most recent good figures.</p>";
+    }
+
+    html += "<footer>";
+    if (DATA.fetchedLabel) {
+      html += '<p class="note">Market and hotel figures pulled ' + esc(DATA.fetchedLabel) +
+        " from live listings and market trackers; hotel figures are nightly room rates before taxes and fees. " +
+        "Each bar spans the range of monthly averages inside the selected window \u2014 the softest month to the strongest \u2014 " +
+        "from the available monthly data, anchored to your trailing-12-month actual average; the delta strip shows the window\u2019s overall average. " +
+        "Not date-specific quotes. No growth trend is applied to any year; the premium over market is the tracked figure \u2014 " +
+        "actual for the trailing year, projected for future windows.</p>";
+    }
+    if (view.sources.length > 0) {
+      html += "<ul>";
+      for (const s of view.sources) {
+        html += '<li><a href="' + esc(s.url) + '" target="_blank" rel="noreferrer">' + esc(s.name) + "</a></li>";
+      }
+      html += "</ul>";
+    }
+    html += "</footer>";
+    c.innerHTML = html;
+  }
+
+  function init() {
+    const stamp = $("stamp");
+    if (DATA && DATA.fetchedLabel) {
+      stamp.textContent = "Snapshot of the live Airbnb Pricing Dashboard \u00b7 regenerated every morning \u00b7 market data as of " + DATA.fetchedLabel + " ET";
+    }
+    const fr = $("fromRange"), tr = $("toRange");
+    fr.addEventListener("input", () => {
+      state.from = Math.min(Number(fr.value), state.to - (MIN_WINDOW_NIGHTS - 1));
+      state.selYear = null; state.selSeason = null;
+      syncSlider(); renderControls(); render();
+    });
+    tr.addEventListener("input", () => {
+      state.to = Math.max(Number(tr.value), state.from + (MIN_WINDOW_NIGHTS - 1));
+      state.selYear = null; state.selSeason = null;
+      syncSlider(); renderControls(); render();
+    });
+    syncSlider(); renderControls(); render();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+}
+</script>
+</body>
+</html>
