@@ -101,6 +101,32 @@
   .chipbtn[aria-pressed="false"]{opacity:.42}
   .infl-latest{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px;font-size:13.5px;font-variant-numeric:tabular-nums}
   .infl-latest .item .nm{color:var(--muted);margin-right:6px}
+  /* fear & greed */
+  .fg-pill{display:inline-block;font-size:12.5px;font-weight:700;color:var(--neg);
+    background:rgba(198,47,59,.10);border-radius:999px;padding:3px 11px}
+  @media (prefers-color-scheme: dark){ .fg-pill{background:rgba(242,109,109,.14)} }
+  .fg-grid{display:flex;flex-wrap:wrap;gap:16px 30px;margin-top:14px;align-items:flex-start}
+  .fg-gauge{flex:1 1 290px;max-width:370px;min-width:260px}
+  .fg-gauge svg{display:block;width:100%;height:auto}
+  .fg-legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:2px;font-size:11.5px;color:var(--muted)}
+  .fg-legend .li{display:inline-flex;align-items:center;gap:5px}
+  .fg-legend .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .fg-side{flex:1 1 250px;min-width:230px}
+  .fg-tl-h{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .fg-timeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+  .fg-tl{background:var(--surface2);border-radius:8px;padding:8px 10px 7px}
+  .fg-tl .k{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:1px}
+  .fg-tl .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+  .fg-tl .z{display:block;font-size:11px;color:var(--muted)}
+  .fg-strip{display:flex;gap:6px;margin-top:6px}
+  .fg-col{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+  .fg-col .v{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:3px}
+  .fg-track{height:74px;width:100%;display:flex;align-items:flex-end;justify-content:center;
+    border-bottom:1px solid var(--border)}
+  .fg-bar{width:72%;max-width:36px;border-radius:4px 4px 0 0}
+  .fg-col .d{font-size:11px;color:var(--faint);margin-top:5px;white-space:nowrap}
+  .fg-comps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .fg-comp{font-size:12px;color:var(--muted);background:var(--surface2);border-radius:999px;padding:3px 10px}
   footer.pagefoot{margin-top:26px;font-size:12.5px;color:var(--faint);line-height:1.6}
   @media (max-width:560px){
     .wrap{padding:20px 12px 44px}
@@ -115,8 +141,8 @@
 <div class="wrap" id="top">
   <header class="pagehead">
     <h1>Economic Indicators</h1>
-    <p class="lede">Fourteen U.S. indicators — prices, jobs, spending, housing, rates and business surveys — each with its full history, the latest reading, and what to watch next.</p>
-    <p class="asof">Snapshot as of Friday, November 13, 2026 · Data: FRED (Federal Reserve Bank of St. Louis) and the Institute for Supply Management. Charts show each series&rsquo; full available history; use the range controls to zoom.</p>
+    <p class="lede">Fifteen U.S. indicators — prices, jobs, spending, housing, rates, business surveys and market sentiment — each with its full history, the latest reading, and what to watch next.</p>
+    <p class="asof">Snapshot as of Friday, November 20, 2026 · Data: FRED (Federal Reserve Bank of St. Louis), the Institute for Supply Management and CNN Business. Charts show each series&rsquo; full available history; use the range controls to zoom.</p>
   </header>
 
   <div class="controls" aria-label="Chart time range">
@@ -137,6 +163,76 @@
   </div>
 
   <div class="band" id="band"></div>
+
+  <section class="ind" id="sec-fear-greed">
+    <div class="titlebar">
+      <h2>Fear &amp; Greed Index</h2>
+      <button class="topbtn" data-top>top</button>
+    </div>
+    <div class="bigrow">
+      <span class="bigval">10</span>
+      <span class="fg-pill">Extreme Fear</span>
+      <span class="bigper">November 20, 2026 · CNN Business · 0 = extreme fear, 100 = extreme greed</span>
+      <span class="chg"><span><span class="k">Prev close </span><span class="neg">−8.0 pts</span></span><span><span class="k">Week ago </span><span class="neg">−27.0 pts</span></span></span>
+    </div>
+    <span class="next"><b>Updates:</b> daily — CNN publishes a live reading through each U.S. trading session</span>
+    <p class="why"><span class="k">Why it matters.</span> CNN Business&rsquo;s composite of seven equally weighted market signals, compressed into a single 0&ndash;100 score for the emotion driving the U.S. stock market. The seven inputs:</p>
+    <div class="fg-comps">
+      <span class="fg-comp">Market momentum — S&amp;P 500 vs. its 125-day average</span>
+      <span class="fg-comp">Stock price strength — 52-week highs vs. lows</span>
+      <span class="fg-comp">Stock price breadth — advancing vs. declining volume</span>
+      <span class="fg-comp">Put &amp; call options</span>
+      <span class="fg-comp">Junk bond demand</span>
+      <span class="fg-comp">Market volatility — VIX vs. its 50-day average</span>
+      <span class="fg-comp">Safe haven demand — stocks vs. Treasuries</span>
+    </div>
+    <p class="outlook"><span class="k">Outlook.</span> At 10, the index sits near the bottom of its range — down 8 points from the previous close, 27 below a week ago and 18 below a month ago; a year ago it was 5. Readings this low mean investors are shedding risk indiscriminately rather than pricing stocks one by one. They have historically clustered near washed-out, late-stage selling, but the index is a coincident gauge, not a timing tool — it can stay in single digits for weeks during a true bear market.</p>
+    <div class="fg-grid">
+      <div class="fg-gauge">
+        <svg viewBox="0 0 340 178" role="img" aria-label="Fear and Greed gauge showing 10 out of 100, in the extreme fear zone">
+          <path d="M20.0 165.0 A150 150 0 0 1 63.9 58.9 L86.6 81.6 A118 118 0 0 0 52.0 165.0 Z" fill="#c62f3b"/>
+          <path d="M63.9 58.9 A150 150 0 0 1 146.5 16.8 L151.5 48.5 A118 118 0 0 0 86.6 81.6 Z" fill="#e07b39"/>
+          <path d="M146.5 16.8 A150 150 0 0 1 193.5 16.8 L188.5 48.5 A118 118 0 0 0 151.5 48.5 Z" fill="#8a8f98"/>
+          <path d="M193.5 16.8 A150 150 0 0 1 276.1 58.9 L253.4 81.6 A118 118 0 0 0 188.5 48.5 Z" fill="#5da85f"/>
+          <path d="M276.1 58.9 A150 150 0 0 1 320.0 165.0 L288.0 165.0 A118 118 0 0 0 253.4 81.6 Z" fill="#178a4c"/>
+          <line x1="170" y1="165" x2="74.9" y2="134.1" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="170" cy="165" r="7" fill="var(--ink)"/>
+          <text x="14" y="178" font-size="11" fill="var(--faint)" font-weight="600">0</text>
+          <text x="316" y="178" font-size="11" fill="var(--faint)" font-weight="600">100</text>
+        </svg>
+        <div class="fg-legend">
+          <span class="li"><span class="dot" style="background:#c62f3b"></span>0&ndash;24 Extreme Fear</span>
+          <span class="li"><span class="dot" style="background:#e07b39"></span>25&ndash;44 Fear</span>
+          <span class="li"><span class="dot" style="background:#8a8f98"></span>45&ndash;55 Neutral</span>
+          <span class="li"><span class="dot" style="background:#5da85f"></span>56&ndash;74 Greed</span>
+          <span class="li"><span class="dot" style="background:#178a4c"></span>75&ndash;100 Extreme Greed</span>
+        </div>
+      </div>
+      <div class="fg-side">
+        <p class="fg-tl-h">CNN&rsquo;s published timeline</p>
+        <div class="fg-timeline">
+          <div class="fg-tl"><span class="k">Now</span><span class="v">10</span><span class="z">Extreme Fear</span></div>
+          <div class="fg-tl"><span class="k">Previous close</span><span class="v">18</span><span class="z">Extreme Fear</span></div>
+          <div class="fg-tl"><span class="k">1 week ago</span><span class="v">37</span><span class="z">Fear</span></div>
+          <div class="fg-tl"><span class="k">1 month ago</span><span class="v">28</span><span class="z">Fear</span></div>
+          <div class="fg-tl"><span class="k">1 year ago</span><span class="v">5</span><span class="z">Extreme Fear</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="subchart-h">The slide — daily closes, last eight sessions</p>
+    <div class="fg-strip" role="img" aria-label="Daily Fear and Greed closes falling from 40 on November 12 to 10 on November 20, 2026">
+      <div class="fg-col"><span class="v">36</span><div class="fg-track"><div class="fg-bar" style="height:36%;background:#e07b39"></div></div><span class="d">Nov 11</span></div>
+      <div class="fg-col"><span class="v">40</span><div class="fg-track"><div class="fg-bar" style="height:40%;background:#e07b39"></div></div><span class="d">Nov 12</span></div>
+      <div class="fg-col"><span class="v">37</span><div class="fg-track"><div class="fg-bar" style="height:37%;background:#e07b39"></div></div><span class="d">Nov 13</span></div>
+      <div class="fg-col"><span class="v">31</span><div class="fg-track"><div class="fg-bar" style="height:31%;background:#e07b39"></div></div><span class="d">Nov 16</span></div>
+      <div class="fg-col"><span class="v">26</span><div class="fg-track"><div class="fg-bar" style="height:26%;background:#e07b39"></div></div><span class="d">Nov 17</span></div>
+      <div class="fg-col"><span class="v">30</span><div class="fg-track"><div class="fg-bar" style="height:30%;background:#e07b39"></div></div><span class="d">Nov 18</span></div>
+      <div class="fg-col"><span class="v">18</span><div class="fg-track"><div class="fg-bar" style="height:18%;background:#c62f3b"></div></div><span class="d">Nov 19</span></div>
+      <div class="fg-col"><span class="v">10</span><div class="fg-track"><div class="fg-bar" style="height:10%;background:#c62f3b"></div></div><span class="d">Nov 20</span></div>
+    </div>
+    <p class="src">Source: CNN Business Fear &amp; Greed Index — gauge and timeline as published by CNN on Nov 20, 2026; daily closes for Nov 11&ndash;18 as republished from CNN by Adanos, Nov 19&ndash;20 from CNN&rsquo;s published timeline. Reading fetched Nov 20, 2026.</p>
+  </section>
+
   <div id="sections"></div>
 
   <section class="ind" id="sec-inflation">
@@ -152,7 +248,7 @@
   </section>
 
   <footer class="pagefoot">
-    Values are the latest published readings as of the snapshot date above. Month-over-month and year-over-year changes are computed from the source series; rates, spreads, the PMIs, sentiment and the unemployment rate are shown as point changes, everything else as percent changes. BLS published no October 2025 price or household-survey data during the federal shutdown, so year-over-year changes for CPI, core CPI and the unemployment rate run through September 2026 and are labeled “YoY (Sep).” This page is a fixed snapshot — it does not refresh.
+    Values are the latest published readings as of the snapshot date above. Month-over-month and year-over-year changes are computed from the source series; rates, spreads, the PMIs, sentiment and the unemployment rate are shown as point changes, everything else as percent changes. BLS published no October 2025 price or household-survey data during the federal shutdown, so year-over-year changes for CPI, core CPI and the unemployment rate run through September 2026 and are labeled “YoY (Sep).” The Fear &amp; Greed reading is CNN Business&rsquo;s index as published on November 20, 2026, fetched that day; CNN updates it through each trading session, so the live figure will have moved on. This page is a fixed snapshot — it does not refresh.
   </footer>
 </div>
 
@@ -325,6 +421,11 @@ INDS.forEach(function(ind){
     '<div class="chg">'+fmtChanges(ind)+'</div>';
   band.appendChild(card);
 });
+var fgCard=document.createElement("div"); fgCard.className="card";
+fgCard.innerHTML='<h3><a href="#sec-fear-greed">Fear &amp; Greed Index</a></h3>'+
+  '<div class="val">10</div><div class="per">November 20, 2026 · Extreme Fear · CNN Business, 0–100</div>'+
+  '<div class="chg"><span><span class="k">Prev close </span><span class="neg">−8.0 pts</span></span><span><span class="k">Week ago </span><span class="neg">−27.0 pts</span></span></div>';
+band.insertBefore(fgCard, band.firstChild);
 band.addEventListener("click",function(e){
   var a=e.target.closest("a[href^='#']"); if(!a) return;
   var t=document.querySelector(a.getAttribute("href"));
