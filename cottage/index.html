@@ -214,6 +214,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <label>Facebook<input type="url" id="fFb" placeholder="facebook.com/…"></label>
         <label>Instagram<input type="text" id="fIg" placeholder="@yourhandle or profile link"></label>
         <label>LinkedIn<input type="url" id="fLi" placeholder="linkedin.com/in/…"></label>
+        <label class="full">Other — a personal site, blog, or anything else that shows you're you<input type="text" id="fOther" placeholder="Link or a line about you"></label>
         <label class="full" style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" id="fAgree" style="margin-top:3px"> <span>I have read and agree to the <a href="#rules">house rules</a>, terms and cancellation policy.</span></label>
       </form>
       <div class="total" id="totalBox">Select dates on the calendar to see your total. <span class="muted">2-night minimum · check-in 4–10 PM · checkout by 11 AM.</span></div>
@@ -380,8 +381,8 @@ document.getElementById("sendBtn").onclick=async()=>{
   if(nights<CONFIG.minNights){ note.textContent="Please choose at least "+CONFIG.minNights+" nights."; return; }
   if(!name || !email){ note.textContent="Please add your name and email so we can reply."; return; }
   if(!document.getElementById("fAgree").checked){ note.textContent="Please tick the box confirming you have read and agree to the house rules and terms."; return; }
-  const profiles={airbnb:document.getElementById("fAb").value.trim(),facebook:document.getElementById("fFb").value.trim(),instagram:document.getElementById("fIg").value.trim(),linkedin:document.getElementById("fLi").value.trim()};
-  if(!profiles.airbnb && !profiles.facebook && !profiles.instagram && !profiles.linkedin){ note.textContent="Please share at least one profile link (Airbnb, Facebook, Instagram, or LinkedIn) so we can confirm you are a real person."; return; }
+  const profiles={airbnb:document.getElementById("fAb").value.trim(),facebook:document.getElementById("fFb").value.trim(),instagram:document.getElementById("fIg").value.trim(),linkedin:document.getElementById("fLi").value.trim(),other:document.getElementById("fOther").value.trim()};
+  if(!profiles.airbnb && !profiles.facebook && !profiles.instagram && !profiles.linkedin && !profiles.other){ note.textContent="Please share at least one profile link (Airbnb, Facebook, Instagram, or LinkedIn) so we can confirm you are a real person."; return; }
   const guests=document.getElementById("fGuests").value;
   const phone=document.getElementById("fPhone").value.trim();
   const msg=document.getElementById("fMsg").value.trim();
@@ -409,6 +410,7 @@ document.getElementById("sendBtn").onclick=async()=>{
     profiles.facebook?("Facebook: "+profiles.facebook):null,
     profiles.instagram?("Instagram: "+profiles.instagram):null,
     profiles.linkedin?("LinkedIn: "+profiles.linkedin):null,
+    profiles.other?("Other: "+profiles.other):null,
     "Estimated total (before lodging taxes): "+money(total),
     "Name: "+name,
     "Email: "+email,
