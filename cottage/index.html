@@ -107,7 +107,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <a href="#about">The Cottage</a>
       <a href="#photos">Photos</a>
       <a href="#amenities">Amenities</a>
-      <a href="#rules">Good to Know</a>
+      <a href="#rules">House Rules</a>
       <a class="btn" href="#book">Book Direct</a>
     </nav>
   </div>
@@ -138,6 +138,29 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="sleep" style="margin-top:22px">
       <div><b>Bedroom</b><br>1 queen bed with hybrid mattress, desk, full-length mirror, walk-in closet.</div>
       <div><b>Living room</b><br>1 queen sleeper sofa with memory foam — good for a small family or close friends traveling together.</div>
+    </div>
+  </section>
+
+  <section id="rules">
+    <h2>House rules</h2>
+    <p class="muted" style="max-width:720px">Please read these before booking — they are the same rules as our Airbnb listing, and booking direct means agreeing to them.</p>
+    <div class="cols" style="margin-top:14px">
+      <ul class="rules">
+        <li><b>Check-in:</b> 4:00–10:00 PM, self check-in by keypad. Earlier check-in on request when we can.</li>
+        <li><b>Checkout:</b> by 11:00 AM. Please message us when you have departed, and lock up.</li>
+        <li><b>Minimum stay:</b> 2 nights.</li>
+        <li><b>Guests:</b> up to 4 overnight guests. The rate covers 2 guests; each guest beyond 2 is $50/night. Only guests on the reservation may stay overnight.</li>
+        <li><b>Shoes off inside</b>, please.</li>
+        <li><b>Quiet hours:</b> 10 PM – 8 AM.</li>
+        <li>No pets. No smoking or vaping. No parties or events. No commercial photography or filming.</li>
+      </ul>
+      <ul class="rules">
+        <li><b>Parking &amp; driveway:</b> one dedicated space, sized for a small to midsize car/SUV. The driveway is narrow with tight turns — large vehicles will find it challenging. Drive slowly at all times; our homes are close together and young children play outdoors.</li>
+        <li><b>Waterfront yard:</b> shared and unfenced at the water's edge, reached by paved steps down a steep incline, with some heights without rails — please keep an extra eye on children.</li>
+        <li><b>Basement:</b> off-limits, except washer/dryer use on request.</li>
+        <li><b>Good to know:</b> some spaces are shared with the neighboring homes, and there is potential for everyday neighborhood noise.</li>
+        <li><b>Cancellation:</b> full refund if you cancel 5 or more days before check-in. Cancel inside 5 days and the first night is non-refundable; remaining nights are refunded at 50%.</li>
+      </ul>
     </div>
   </section>
 
@@ -186,32 +209,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <label>Email<input type="email" id="fEmail" required placeholder="you@example.com"></label>
         <label>Phone (optional)<input type="tel" id="fPhone" placeholder="For day-of-arrival texts"></label>
         <label class="full">Anything we should know? (optional)<textarea id="fMsg" rows="3" placeholder="Arrival time, kids' gear, questions…"></textarea></label>
+        <label class="full" style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" id="fAgree" style="margin-top:3px"> <span>I have read and agree to the <a href="#rules">house rules</a>, including the cancellation policy, and the terms of this booking.</span></label>
       </form>
       <div class="total" id="totalBox">Select dates on the calendar to see your total. <span class="muted">2-night minimum · check-in 4–10 PM · checkout by 11 AM.</span></div>
       <p style="margin-top:16px"><button class="btn terra" id="sendBtn" type="button">Request to book</button></p>
       <p class="note" id="sendNote">Requesting opens your email app with everything pre-filled — just press send. Prefer Airbnb? You can still <a href="https://www.airbnb.com/rooms/1195905501751645673" target="_blank" rel="noopener">book the cottage there</a>.</p>
-    </div>
-  </section>
-
-  <section id="rules">
-    <h2>Good to know</h2>
-    <div class="cols">
-      <ul class="rules">
-        <li><b>Check-in:</b> 4:00–10:00 PM, self check-in by keypad. Earlier check-in on request when we can.</li>
-        <li><b>Checkout:</b> by 11:00 AM. Please message us when you've departed, and lock up.</li>
-        <li><b>Minimum stay:</b> 2 nights</li>
-        <li><b>Guests:</b> up to 4 overnight guests. The rate covers 2 guests; each guest beyond 2 is $50/night. Only guests on the reservation may stay overnight.</li>
-        <li><b>Parking:</b> one dedicated space, best for a small to midsize car/SUV. The driveway is narrow with tight turns — drive slowly.</li>
-      </ul>
-      <ul class="rules">
-        <li>No pets</li>
-        <li>No smoking, including vaping</li>
-        <li>Quiet hours 10 PM – 8 AM</li>
-        <li>No parties or events</li>
-        <li>Please remove shoes inside</li>
-        <li>The waterfront yard is shared and unfenced at the water's edge — please keep an extra eye on children.</li>
-        <li>Washer/dryer in the basement available on request. Basement otherwise off-limits.</li>
-      </ul>
     </div>
   </section>
 
@@ -367,6 +369,7 @@ document.getElementById("sendBtn").onclick=()=>{
   const nights=Math.round((selOut-selIn)/86400000);
   if(nights<CONFIG.minNights){ note.textContent="Please choose at least "+CONFIG.minNights+" nights."; return; }
   if(!name || !email){ note.textContent="Please add your name and email so we can reply."; return; }
+  if(!document.getElementById("fAgree").checked){ note.textContent="Please tick the box confirming you have read and agree to the house rules and terms."; return; }
   const guests=document.getElementById("fGuests").value;
   const phone=document.getElementById("fPhone").value.trim();
   const msg=document.getElementById("fMsg").value.trim();
@@ -379,6 +382,7 @@ document.getElementById("sendBtn").onclick=()=>{
     "Check-out: "+document.getElementById("fOut").value,
     "Nights: "+nights,
     "Guests: "+guests,
+    "House rules & terms: Agreed",
     "Estimated total (before lodging taxes): "+money(total),
     "Name: "+name,
     "Email: "+email,
