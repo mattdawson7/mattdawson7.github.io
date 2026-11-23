@@ -71,6 +71,22 @@ h4{margin:16px 0 6px;font-size:15px;font-weight:600;color:var(--heading)}
 .btrack{background:var(--track);border-radius:999px;height:9px;margin-top:4px;overflow:hidden}
 .bfill{background:var(--accent);height:100%;border-radius:999px}
 .grey .bfill{background:var(--faint)}
+.tiles{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+.tiles .card{margin:0}
+.tile{flex:1 1 180px}
+.tile .bigstat{margin:0 0 2px}
+.tile-l{color:var(--muted);font-size:14px}
+.stack{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--track)}
+.stack.big{height:32px}
+.stack.sm{height:20px}
+.seg{height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:11px;font-size:13.5px}
+.leg{white-space:nowrap}
+.dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px}
+.crow{display:flex;align-items:center;gap:10px;margin:7px 0}
+.crow-n{width:152px;flex:none;text-align:right;font-size:13px;color:var(--muted)}
+.crow-b{flex:1;min-width:0}
+@media (max-width:560px){.crow-n{width:102px;font-size:12px}}
 .bnote{font-size:12.5px;color:var(--muted);margin-top:2px}
 .subrow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);padding:1px 0 1px 14px}
 .spec{margin:16px 0}
@@ -958,27 +974,34 @@ footer{padding:14px;text-align:center;color:var(--faint);font-size:12.5px}
 </section>
 <section class="sec on" id="sec-viz">
 <h2>Visualizations</h2>
+<div class="tiles">
+<div class="card tile"><div class="bigstat">782</div><div class="tile-l">Books catalogued</div></div>
+<div class="card tile"><div class="bigstat">357 · 46%</div><div class="tile-l">Read so far</div></div>
+</div>
+<div class="card"><h3>Reading progress — overall</h3>
+<div class="stack big"><div class="seg" style="width:45.65%;background:#2e7d5c" title="Read · 357"></div><div class="seg" style="width:20.59%;background:#bf443c" title="Not read · 161"></div><div class="seg" style="width:9.46%;background:#dd8a1d" title="Unknown · 74"></div><div class="seg" style="width:24.30%;background:#b3aa9c" title="Unmarked · 190"></div></div>
+<div class="legend"><span class="leg"><span class="dot" style="background:#2e7d5c"></span>Read · 357 (46%)</span><span class="leg"><span class="dot" style="background:#bf443c"></span>Not read · 161 (21%)</span><span class="leg"><span class="dot" style="background:#dd8a1d"></span>Unknown · 74 (9%)</span><span class="leg"><span class="dot" style="background:#b3aa9c"></span>Unmarked · 190 (24%)</span></div>
+</div>
 <div class="card"><h3>Reading progress by category</h3>
-<div class="brow"><div class="brow-h"><span><b>All books</b></span><span class="brow-v">357 of 782 read (46%)</span></div><div class="btrack"><div class="bfill" style="width:45.7%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Theology</span><span class="brow-v">51 of 184 read (28%)</span></div><div class="btrack"><div class="bfill" style="width:27.7%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Christian Life</span><span class="brow-v">48 of 140 read (34%)</span></div><div class="btrack"><div class="bfill" style="width:34.3%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>History</span><span class="brow-v">36 of 67 read (54%)</span></div><div class="btrack"><div class="bfill" style="width:53.7%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Business</span><span class="brow-v">49 of 65 read (75%)</span></div><div class="btrack"><div class="bfill" style="width:75.4%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Fiction</span><span class="brow-v">22 of 47 read (47%)</span></div><div class="btrack"><div class="bfill" style="width:46.8%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Politics</span><span class="brow-v">16 of 46 read (35%)</span></div><div class="btrack"><div class="bfill" style="width:34.8%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Reference</span><span class="brow-v">25 of 38 read (66%)</span></div><div class="btrack"><div class="bfill" style="width:65.8%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Psychology</span><span class="brow-v">25 of 32 read (78%)</span></div><div class="btrack"><div class="bfill" style="width:78.1%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Marriage &amp; Relationships</span><span class="brow-v">18 of 26 read (69%)</span></div><div class="btrack"><div class="bfill" style="width:69.2%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Poetry</span><span class="brow-v">8 of 23 read (35%)</span></div><div class="btrack"><div class="bfill" style="width:34.8%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Biography &amp; Memoir</span><span class="brow-v">9 of 22 read (41%)</span></div><div class="btrack"><div class="bfill" style="width:40.9%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Travel</span><span class="brow-v">14 of 19 read (74%)</span></div><div class="btrack"><div class="bfill" style="width:73.7%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Science &amp; Nature</span><span class="brow-v">8 of 14 read (57%)</span></div><div class="btrack"><div class="bfill" style="width:57.1%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Philosophy</span><span class="brow-v">7 of 13 read (54%)</span></div><div class="btrack"><div class="bfill" style="width:53.8%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Personal Finance</span><span class="brow-v">11 of 12 read (92%)</span></div><div class="btrack"><div class="bfill" style="width:91.7%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Self-Help</span><span class="brow-v">5 of 12 read (42%)</span></div><div class="btrack"><div class="bfill" style="width:41.7%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Art &amp; Music</span><span class="brow-v">0 of 11 read (0%)</span></div><div class="btrack"><div class="bfill" style="width:0.0%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Other</span><span class="brow-v">1 of 6 read (17%)</span></div><div class="btrack"><div class="bfill" style="width:16.7%"></div></div></div>
-<div class="brow"><div class="brow-h"><span>Education &amp; Society</span><span class="brow-v">4 of 5 read (80%)</span></div><div class="btrack"><div class="bfill" style="width:80.0%"></div></div></div>
+<div class="crow"><span class="crow-n">Theology</span><div class="crow-b"><div class="stack sm" style="width:100.0%" title="Theology — Read 51, Not read 17, Unknown 15, Unmarked 101"><div class="seg" style="width:27.72%;background:#2e7d5c" title="Read · 51"></div><div class="seg" style="width:9.24%;background:#bf443c" title="Not read · 17"></div><div class="seg" style="width:8.15%;background:#dd8a1d" title="Unknown · 15"></div><div class="seg" style="width:54.89%;background:#b3aa9c" title="Unmarked · 101"></div></div></div></div>
+<div class="crow"><span class="crow-n">Christian Life</span><div class="crow-b"><div class="stack sm" style="width:76.1%" title="Christian Life — Read 48, Not read 13, Unknown 11, Unmarked 68"><div class="seg" style="width:34.29%;background:#2e7d5c" title="Read · 48"></div><div class="seg" style="width:9.29%;background:#bf443c" title="Not read · 13"></div><div class="seg" style="width:7.86%;background:#dd8a1d" title="Unknown · 11"></div><div class="seg" style="width:48.57%;background:#b3aa9c" title="Unmarked · 68"></div></div></div></div>
+<div class="crow"><span class="crow-n">History</span><div class="crow-b"><div class="stack sm" style="width:36.4%" title="History — Read 36, Not read 22, Unknown 9"><div class="seg" style="width:53.73%;background:#2e7d5c" title="Read · 36"></div><div class="seg" style="width:32.84%;background:#bf443c" title="Not read · 22"></div><div class="seg" style="width:13.43%;background:#dd8a1d" title="Unknown · 9"></div></div></div></div>
+<div class="crow"><span class="crow-n">Business</span><div class="crow-b"><div class="stack sm" style="width:35.3%" title="Business — Read 49, Not read 10, Unknown 6"><div class="seg" style="width:75.38%;background:#2e7d5c" title="Read · 49"></div><div class="seg" style="width:15.38%;background:#bf443c" title="Not read · 10"></div><div class="seg" style="width:9.23%;background:#dd8a1d" title="Unknown · 6"></div></div></div></div>
+<div class="crow"><span class="crow-n">Fiction</span><div class="crow-b"><div class="stack sm" style="width:25.5%" title="Fiction — Read 22, Not read 17, Unknown 5, Unmarked 3"><div class="seg" style="width:46.81%;background:#2e7d5c" title="Read · 22"></div><div class="seg" style="width:36.17%;background:#bf443c" title="Not read · 17"></div><div class="seg" style="width:10.64%;background:#dd8a1d" title="Unknown · 5"></div><div class="seg" style="width:6.38%;background:#b3aa9c" title="Unmarked · 3"></div></div></div></div>
+<div class="crow"><span class="crow-n">Politics</span><div class="crow-b"><div class="stack sm" style="width:25.0%" title="Politics — Read 16, Not read 22, Unknown 7, Unmarked 1"><div class="seg" style="width:34.78%;background:#2e7d5c" title="Read · 16"></div><div class="seg" style="width:47.83%;background:#bf443c" title="Not read · 22"></div><div class="seg" style="width:15.22%;background:#dd8a1d" title="Unknown · 7"></div><div class="seg" style="width:2.17%;background:#b3aa9c" title="Unmarked · 1"></div></div></div></div>
+<div class="crow"><span class="crow-n">Reference</span><div class="crow-b"><div class="stack sm" style="width:20.7%" title="Reference — Read 25, Not read 4, Unknown 9"><div class="seg" style="width:65.79%;background:#2e7d5c" title="Read · 25"></div><div class="seg" style="width:10.53%;background:#bf443c" title="Not read · 4"></div><div class="seg" style="width:23.68%;background:#dd8a1d" title="Unknown · 9"></div></div></div></div>
+<div class="crow"><span class="crow-n">Psychology</span><div class="crow-b"><div class="stack sm" style="width:17.4%" title="Psychology — Read 25, Not read 2, Unknown 2, Unmarked 3"><div class="seg" style="width:78.12%;background:#2e7d5c" title="Read · 25"></div><div class="seg" style="width:6.25%;background:#bf443c" title="Not read · 2"></div><div class="seg" style="width:6.25%;background:#dd8a1d" title="Unknown · 2"></div><div class="seg" style="width:9.38%;background:#b3aa9c" title="Unmarked · 3"></div></div></div></div>
+<div class="crow"><span class="crow-n">Marriage &amp; Relationships</span><div class="crow-b"><div class="stack sm" style="width:14.1%" title="Marriage &amp; Relationships — Read 18, Not read 6, Unmarked 2"><div class="seg" style="width:69.23%;background:#2e7d5c" title="Read · 18"></div><div class="seg" style="width:23.08%;background:#bf443c" title="Not read · 6"></div><div class="seg" style="width:7.69%;background:#b3aa9c" title="Unmarked · 2"></div></div></div></div>
+<div class="crow"><span class="crow-n">Poetry</span><div class="crow-b"><div class="stack sm" style="width:12.5%" title="Poetry — Read 8, Not read 10, Unknown 1, Unmarked 4"><div class="seg" style="width:34.78%;background:#2e7d5c" title="Read · 8"></div><div class="seg" style="width:43.48%;background:#bf443c" title="Not read · 10"></div><div class="seg" style="width:4.35%;background:#dd8a1d" title="Unknown · 1"></div><div class="seg" style="width:17.39%;background:#b3aa9c" title="Unmarked · 4"></div></div></div></div>
+<div class="crow"><span class="crow-n">Biography &amp; Memoir</span><div class="crow-b"><div class="stack sm" style="width:12.0%" title="Biography &amp; Memoir — Read 9, Not read 6, Unknown 1, Unmarked 6"><div class="seg" style="width:40.91%;background:#2e7d5c" title="Read · 9"></div><div class="seg" style="width:27.27%;background:#bf443c" title="Not read · 6"></div><div class="seg" style="width:4.55%;background:#dd8a1d" title="Unknown · 1"></div><div class="seg" style="width:27.27%;background:#b3aa9c" title="Unmarked · 6"></div></div></div></div>
+<div class="crow"><span class="crow-n">Travel</span><div class="crow-b"><div class="stack sm" style="width:10.3%" title="Travel — Read 14, Not read 4, Unknown 1"><div class="seg" style="width:73.68%;background:#2e7d5c" title="Read · 14"></div><div class="seg" style="width:21.05%;background:#bf443c" title="Not read · 4"></div><div class="seg" style="width:5.26%;background:#dd8a1d" title="Unknown · 1"></div></div></div></div>
+<div class="crow"><span class="crow-n">Science &amp; Nature</span><div class="crow-b"><div class="stack sm" style="width:7.6%" title="Science &amp; Nature — Read 8, Not read 3, Unknown 3"><div class="seg" style="width:57.14%;background:#2e7d5c" title="Read · 8"></div><div class="seg" style="width:21.43%;background:#bf443c" title="Not read · 3"></div><div class="seg" style="width:21.43%;background:#dd8a1d" title="Unknown · 3"></div></div></div></div>
+<div class="crow"><span class="crow-n">Philosophy</span><div class="crow-b"><div class="stack sm" style="width:7.1%" title="Philosophy — Read 7, Not read 5, Unmarked 1"><div class="seg" style="width:53.85%;background:#2e7d5c" title="Read · 7"></div><div class="seg" style="width:38.46%;background:#bf443c" title="Not read · 5"></div><div class="seg" style="width:7.69%;background:#b3aa9c" title="Unmarked · 1"></div></div></div></div>
+<div class="crow"><span class="crow-n">Personal Finance</span><div class="crow-b"><div class="stack sm" style="width:6.5%" title="Personal Finance — Read 11, Not read 1"><div class="seg" style="width:91.67%;background:#2e7d5c" title="Read · 11"></div><div class="seg" style="width:8.33%;background:#bf443c" title="Not read · 1"></div></div></div></div>
+<div class="crow"><span class="crow-n">Self-Help</span><div class="crow-b"><div class="stack sm" style="width:6.5%" title="Self-Help — Read 5, Not read 4, Unknown 2, Unmarked 1"><div class="seg" style="width:41.67%;background:#2e7d5c" title="Read · 5"></div><div class="seg" style="width:33.33%;background:#bf443c" title="Not read · 4"></div><div class="seg" style="width:16.67%;background:#dd8a1d" title="Unknown · 2"></div><div class="seg" style="width:8.33%;background:#b3aa9c" title="Unmarked · 1"></div></div></div></div>
+<div class="crow"><span class="crow-n">Art &amp; Music</span><div class="crow-b"><div class="stack sm" style="width:6.0%" title="Art &amp; Music — Not read 11"><div class="seg" style="width:100.00%;background:#bf443c" title="Not read · 11"></div></div></div></div>
+<div class="crow"><span class="crow-n">Other</span><div class="crow-b"><div class="stack sm" style="width:3.3%" title="Other — Read 1, Not read 3, Unknown 2"><div class="seg" style="width:16.67%;background:#2e7d5c" title="Read · 1"></div><div class="seg" style="width:50.00%;background:#bf443c" title="Not read · 3"></div><div class="seg" style="width:33.33%;background:#dd8a1d" title="Unknown · 2"></div></div></div></div>
+<div class="crow"><span class="crow-n">Education &amp; Society</span><div class="crow-b"><div class="stack sm" style="width:2.7%" title="Education &amp; Society — Read 4, Not read 1"><div class="seg" style="width:80.00%;background:#2e7d5c" title="Read · 4"></div><div class="seg" style="width:20.00%;background:#bf443c" title="Not read · 1"></div></div></div></div>
 </div>
 <div class="card"><h3>Where I land</h3>
 <p class="note">Estimated from the books on the shelves — owning a book isn’t endorsing it, so read this as the center of gravity of the reading, not a voter registration. The midpoint (5) is exactly balanced.</p>
