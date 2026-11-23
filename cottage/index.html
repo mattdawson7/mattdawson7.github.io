@@ -209,6 +209,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <label>Email<input type="email" id="fEmail" required placeholder="you@example.com"></label>
         <label>Phone (optional)<input type="tel" id="fPhone" placeholder="For day-of-arrival texts"></label>
         <label class="full">Anything we should know? (optional)<textarea id="fMsg" rows="3" placeholder="Arrival time, kids' gear, questions…"></textarea></label>
+        <label class="full" style="font-weight:400"><span style="display:block;font-weight:600;margin-bottom:4px">A little about you</span><span class="muted" style="display:block;margin-bottom:8px">We host in our own neighborhood and personally approve every stay. Sharing a profile or two helps us confirm you are a real person — and requests with profiles usually get a faster yes. Please share at least one.</span></label>
+        <label>Airbnb profile<input type="url" id="fAb" placeholder="airbnb.com/users/…"></label>
+        <label>Facebook<input type="url" id="fFb" placeholder="facebook.com/…"></label>
+        <label>Instagram<input type="text" id="fIg" placeholder="@yourhandle or profile link"></label>
+        <label>LinkedIn<input type="url" id="fLi" placeholder="linkedin.com/in/…"></label>
         <label class="full" style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" id="fAgree" style="margin-top:3px"> <span>I have read and agree to the <a href="#rules">house rules</a>, terms and cancellation policy.</span></label>
       </form>
       <div class="total" id="totalBox">Select dates on the calendar to see your total. <span class="muted">2-night minimum · check-in 4–10 PM · checkout by 11 AM.</span></div>
@@ -251,7 +256,9 @@ const CONFIG = {
   extraGuestFee: 50,       // per night for each guest beyond 2
   includedGuests: 2,
   minNights: 2,
-  contactEmail: "mattdawson7@gmail.com"  // booking requests land here until bookings@spypondcottage.com is set up
+  contactEmail: "mattdawson7@gmail.com",  // fallback if the booking service is offline
+  apiBase: "",               // booking service URL — set at deploy, e.g. "https://spy-pond-cottage-booking.<account>.workers.dev"; empty = email requests
+  taxRatePct: 11.7           // MA lodging tax: 5.7% state + 6% Arlington local
 };
 /* Fallback availability snapshot (2026-11-23) — replaced at load by availability.json, which is regenerated from the Airbnb calendar feed. Ranges are [start, end) — end is checkout day. */
 let UNAVAILABLE = [
@@ -259,7 +266,7 @@ let UNAVAILABLE = [
   {start:"2026-12-02", end:"2026-12-08", type:"booked"},
   {start:"2027-04-01", end:"2027-11-24", type:"blocked"}
 ];
-fetch("availability.json").then(r=>r.ok?r.json():null).then(d=>{ if(d && d.unavailable){ UNAVAILABLE=d.unavailable; renderCal(); } }).catch(()=>{});
+fetch((CONFIG.apiBase?CONFIG.apiBase+"/api/availability":"availability.json")).then(r=>r.ok?r.json():null).then(d=>{ if(d && d.unavailable){ UNAVAILABLE=d.unavailable; renderCal(); } }).catch(()=>{});
 
 /* ===== Gallery ===== */
 const PHOTOS = [
@@ -358,10 +365,13 @@ function updateTotal(){
   if(nights<CONFIG.minNights){ box.innerHTML=`That's ${nights} night${nights===1?"":"s"} — we ask for a ${CONFIG.minNights}-night minimum. Please extend your stay.`; return; }
   const base=nights*CONFIG.nightlyRate;
   const extra=Math.max(0,guests-CONFIG.includedGuests)*CONFIG.extraGuestFee*nights;
-  box.innerHTML=`<b>${money(base+extra)}</b> for ${nights} nights &nbsp;·&nbsp; ${money(CONFIG.nightlyRate)} × ${nights} nights${extra?` &nbsp;·&nbsp; extra guests ${money(extra)}`:""} &nbsp;·&nbsp; no cleaning fee, no Airbnb service fees. <span class="muted">Lodging taxes are added when we confirm — this is an estimate, nothing is charged yet.</span>`;
+  box.innerHTML=`<b>${money(base+extra)}</b> for ${nights} nights &nbsp;·&nbsp; ${money(CONFIG.nightlyRate)} × ${nights} nights${extra?` &nbsp;·&nbsp; extra guests ${money(extra)}`:""} &nbsp;·&nbsp; no cleaning fee, no Airbnb service fees. ` +
+    (CONFIG.apiBase
+      ? `<br><b>$${(base+extra+Math.round((base+extra)*CONFIG.taxRatePct)/100).toFixed(2)}</b> including ${CONFIG.taxRatePct}% MA lodging tax. <span class="muted">Requesting places a hold on your card — nothing is charged until the host approves.</span>`
+      : `<span class="muted">Lodging taxes are added when we confirm — this is an estimate, nothing is charged yet.</span>`);
 }
 document.getElementById("fGuests").onchange=updateTotal;
-document.getElementById("sendBtn").onclick=()=>{
+document.getElementById("sendBtn").onclick=async()=>{
   const name=document.getElementById("fName").value.trim();
   const email=document.getElementById("fEmail").value.trim();
   const note=document.getElementById("sendNote");
@@ -370,11 +380,23 @@ document.getElementById("sendBtn").onclick=()=>{
   if(nights<CONFIG.minNights){ note.textContent="Please choose at least "+CONFIG.minNights+" nights."; return; }
   if(!name || !email){ note.textContent="Please add your name and email so we can reply."; return; }
   if(!document.getElementById("fAgree").checked){ note.textContent="Please tick the box confirming you have read and agree to the house rules and terms."; return; }
+  const profiles={airbnb:document.getElementById("fAb").value.trim(),facebook:document.getElementById("fFb").value.trim(),instagram:document.getElementById("fIg").value.trim(),linkedin:document.getElementById("fLi").value.trim()};
+  if(!profiles.airbnb && !profiles.facebook && !profiles.instagram && !profiles.linkedin){ note.textContent="Please share at least one profile link (Airbnb, Facebook, Instagram, or LinkedIn) so we can confirm you are a real person."; return; }
   const guests=document.getElementById("fGuests").value;
   const phone=document.getElementById("fPhone").value.trim();
   const msg=document.getElementById("fMsg").value.trim();
   const extra=Math.max(0,parseInt(guests,10)-CONFIG.includedGuests)*CONFIG.extraGuestFee*nights;
   const total=nights*CONFIG.nightlyRate+extra;
+  if(CONFIG.apiBase){
+    note.textContent="Sending your request\u2026";
+    try{
+      const r=await fetch(CONFIG.apiBase+"/api/request",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({checkin:fmt(selIn),checkout:fmt(selOut),guests:parseInt(guests,10),name,email,phone,msg,profiles,agreed:true})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok || !d.url){ note.textContent=d.error||"Something went wrong sending your request \u2014 please try again, or use the email option below."; return; }
+      window.location.href=d.url;
+    }catch(e){ note.textContent="Something went wrong sending your request \u2014 please try again, or use the email option below."; }
+    return;
+  }
   const body=[
     "Hi Jess and Sabrina,","",
     "I'd like to book Spy Pond Cottage directly.",
@@ -383,6 +405,10 @@ document.getElementById("sendBtn").onclick=()=>{
     "Nights: "+nights,
     "Guests: "+guests,
     "House rules & terms: Agreed",
+    profiles.airbnb?("Airbnb profile: "+profiles.airbnb):null,
+    profiles.facebook?("Facebook: "+profiles.facebook):null,
+    profiles.instagram?("Instagram: "+profiles.instagram):null,
+    profiles.linkedin?("LinkedIn: "+profiles.linkedin):null,
     "Estimated total (before lodging taxes): "+money(total),
     "Name: "+name,
     "Email: "+email,
@@ -393,6 +419,21 @@ document.getElementById("sendBtn").onclick=()=>{
   window.location.href="mailto:"+CONFIG.contactEmail+"?subject="+encodeURIComponent("Booking request — Spy Pond Cottage — "+document.getElementById("fIn").value)+"&body="+encodeURIComponent(body);
   note.textContent="Your email app should open with the request pre-filled — just press send, and we'll confirm personally, usually within the hour.";
 };
+/* Booking-service mode labels + return messages */
+if(CONFIG.apiBase){
+  document.getElementById("sendBtn").textContent="Request to book — card hold, no charge yet";
+  document.getElementById("sendNote").innerHTML="You will be taken to Stripe\u2019s secure page to place a card hold. Your host approves every request personally — the card is only charged on approval, and the hold is released automatically if the request is declined or not answered within 48 hours.";
+}
+(function(){
+  const q=new URLSearchParams(location.search).get("request");
+  if(q==="received"){
+    document.getElementById("totalBox").innerHTML="<b>Request received — thank you!</b> A hold has been placed on your card (nothing charged). Your host reviews every request personally and usually replies within the hour; the charge only goes through if your stay is approved.";
+    document.getElementById("book").scrollIntoView();
+  } else if(q==="cancelled"){
+    document.getElementById("sendNote").textContent="No request was sent and no hold was placed. Pick your dates whenever you are ready.";
+    document.getElementById("book").scrollIntoView();
+  }
+})();
 renderCal();
 </script>
 <script type="application/ld+json">
