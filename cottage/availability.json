@@ -1,0 +1,21 @@
+{
+ "updated": "2026-11-23",
+ "source": "Airbnb calendar export (dates only)",
+ "unavailable": [
+  {
+   "start": "2026-11-24",
+   "end": "2026-11-29",
+   "type": "blocked"
+  },
+  {
+   "start": "2026-12-02",
+   "end": "2026-12-08",
+   "type": "booked"
+  },
+  {
+   "start": "2027-04-01",
+   "end": "2027-11-24",
+   "type": "blocked"
+  }
+ ]
+}
